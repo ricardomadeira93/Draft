@@ -1,5 +1,7 @@
-import { Link } from "@/routing";
-import { Compass, Database, Search, FileText, Users, History } from "lucide-react";
+"use client";
+
+import { Link, usePathname } from "@/routing";
+import { Compass, Database, Search, FileText, Users, History, LayoutDashboard, Settings } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserButton, OrganizationSwitcher } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
@@ -7,6 +9,7 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const t = useTranslations("Navigation");
+  const pathname = usePathname();
 
   return (
     <div className="flex h-screen bg-background">
@@ -26,26 +29,42 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Nav */}
         <nav className="flex-1 px-3 py-2 space-y-0.5">
+          <Link
+            href="/"
+            className={`flex items-center gap-2.5 px-2 py-2 text-xs font-mono tracking-wide rounded-sm transition-colors ${
+              pathname === "/" ? "text-foreground bg-accent" : "text-muted-foreground hover:text-foreground hover:bg-accent"
+            }`}
+          >
+            <LayoutDashboard className="h-3.5 w-3.5 shrink-0" />
+            Overview
+          </Link>
+
           <p className="px-2 pt-4 pb-2 text-[10px] font-mono tracking-widest uppercase text-muted-foreground">
             Workspace
           </p>
           <Link
             href="/setup"
-            className="flex items-center gap-2.5 px-2 py-2 text-xs font-mono tracking-wide text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors"
+            className={`flex items-center gap-2.5 px-2 py-2 text-xs font-mono tracking-wide rounded-sm transition-colors ${
+              pathname === "/setup" ? "text-foreground bg-accent" : "text-muted-foreground hover:text-foreground hover:bg-accent"
+            }`}
           >
             <Database className="h-3.5 w-3.5 shrink-0" />
             1. Knowledge Library
           </Link>
           <Link
             href="/respond"
-            className="flex items-center gap-2.5 px-2 py-2 text-xs font-mono tracking-wide text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors"
+            className={`flex items-center gap-2.5 px-2 py-2 text-xs font-mono tracking-wide rounded-sm transition-colors ${
+              pathname === "/respond" ? "text-foreground bg-accent" : "text-muted-foreground hover:text-foreground hover:bg-accent"
+            }`}
           >
             <FileText className="h-3.5 w-3.5 shrink-0" />
             2. Auto-Filler
           </Link>
           <Link
             href="/inspect"
-            className="flex items-center gap-2.5 px-2 py-2 text-xs font-mono tracking-wide text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors"
+            className={`flex items-center gap-2.5 px-2 py-2 text-xs font-mono tracking-wide rounded-sm transition-colors ${
+              pathname === "/inspect" ? "text-foreground bg-accent" : "text-muted-foreground hover:text-foreground hover:bg-accent"
+            }`}
           >
             <Search className="h-3.5 w-3.5 shrink-0" />
             3. Answer Inspector
@@ -56,17 +75,30 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </p>
           <Link
             href="/history"
-            className="flex items-center gap-2.5 px-2 py-2 text-xs font-mono tracking-wide text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors"
+            className={`flex items-center gap-2.5 px-2 py-2 text-xs font-mono tracking-wide rounded-sm transition-colors ${
+              pathname === "/history" ? "text-foreground bg-accent" : "text-muted-foreground hover:text-foreground hover:bg-accent"
+            }`}
           >
             <History className="h-3.5 w-3.5 shrink-0" />
             {t('history')}
           </Link>
           <Link
             href="/team"
-            className="flex items-center gap-2.5 px-2 py-2 text-xs font-mono tracking-wide text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors"
+            className={`flex items-center gap-2.5 px-2 py-2 text-xs font-mono tracking-wide rounded-sm transition-colors ${
+              pathname === "/team" ? "text-foreground bg-accent" : "text-muted-foreground hover:text-foreground hover:bg-accent"
+            }`}
           >
             <Users className="h-3.5 w-3.5 shrink-0" />
             {t('team')}
+          </Link>
+          <Link
+            href="/settings"
+            className={`flex items-center gap-2.5 px-2 py-2 text-xs font-mono tracking-wide rounded-sm transition-colors ${
+              pathname === "/settings" ? "text-foreground bg-accent" : "text-muted-foreground hover:text-foreground hover:bg-accent"
+            }`}
+          >
+            <Settings className="h-3.5 w-3.5 shrink-0" />
+            API & Settings
           </Link>
         </nav>
 

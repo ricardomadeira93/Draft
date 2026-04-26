@@ -180,8 +180,14 @@ export default function Workspace() {
   const [elapsed, setElapsed] = useState(0);
   const [language, setLanguage] = useState("English");
   const [results, setResults] = useState<QARow[] | null>(null);
+  const [editedAnswers, setEditedAnswers] = useState<Record<number, string>>({});
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const { getToken, orgId } = useAuth();
+
+  // Merge original results with any user edits
+  const mergedResults: QARow[] = (results ?? []).map((row, i) =>
+    i in editedAnswers ? { ...row, Answer: editedAnswers[i] } : row
+  );
 
   // Parse row count whenever file changes
   useEffect(() => {
@@ -204,6 +210,7 @@ export default function Workspace() {
     if (!file) return;
     setLoading(true);
     setResults(null);
+    setEditedAnswers({});
     const formData = new FormData();
     formData.append("file", file);
     formData.append("language", language);
@@ -327,7 +334,7 @@ export default function Workspace() {
                   variant="outline"
                   size="sm"
                   className="font-mono text-xs tracking-widest uppercase rounded-none gap-2 h-8 border-border"
-                  onClick={() => handleShare(results, setSharing, setShared, getToken, orgId)}
+                  onClick={() => handleShare(mergedResults, setSharing, setShared, getToken, orgId)}
                   disabled={sharing || shared}
                 >
                   {sharing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
@@ -338,7 +345,7 @@ export default function Workspace() {
                   variant="ghost"
                   size="sm"
                   className="font-mono text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground rounded-none gap-2 hover:bg-transparent"
-                  onClick={() => handleExportDoc(results, "pdf", file?.name ?? "rfp.csv", setExporting, getToken, orgId)}
+                  onClick={() => handleExportDoc(mergedResults, "pdf", file?.name ?? "rfp.csv", setExporting, getToken, orgId)}
                   disabled={exporting}
                 >
                   {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
@@ -348,7 +355,7 @@ export default function Workspace() {
                   variant="ghost"
                   size="sm"
                   className="font-mono text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground rounded-none gap-2 hover:bg-transparent"
-                  onClick={() => handleExportDoc(results, "docx", file?.name ?? "rfp.csv", setExporting, getToken, orgId)}
+                  onClick={() => handleExportDoc(mergedResults, "docx", file?.name ?? "rfp.csv", setExporting, getToken, orgId)}
                   disabled={exporting}
                 >
                   {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
@@ -358,7 +365,7 @@ export default function Workspace() {
                   variant="ghost"
                   size="sm"
                   className="font-mono text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground rounded-none gap-2 hover:bg-transparent"
-                  onClick={() => downloadCSV(results, `answered_${file?.name ?? "rfp.csv"}`)}
+                  onClick={() => downloadCSV(mergedResults, `answered_${file?.name ?? "rfp.csv"}`)}
                 >
                   <Download className="h-4 w-4" />
                   CSV
@@ -384,7 +391,26 @@ export default function Workspace() {
                     {results.map((row, i) => (
                       <TableRow key={i} className="border-0 hover:bg-accent/30 align-top">
                         <TableCell className="font-mono text-sm text-foreground align-top py-4">{row.Question}</TableCell>
-                        <TableCell className="text-base text-foreground/90 leading-relaxed align-top py-4">{row.Answer}</TableCell>
+                        <TableCell className="text-base text-foreground/90 leading-relaxed align-top py-4 group relative">
+                          <div
+                            contentEditable
+                            suppressContentEditableWarning
+                            onBlur={e => {
+                              const newText = e.currentTarget.textContent ?? "";
+                              if (newText !== row.Answer) {
+                                setEditedAnswers(prev => ({ ...prev, [i]: newText }));
+                              }
+                            }}
+                            className="outline-none focus:outline-primary/40 focus:outline-1 rounded-none p-1 -m-1 min-h-[1em] whitespace-pre-wrap"
+                          >
+                            {row.Answer}
+                          </div>
+                          {i in editedAnswers && (
+                            <span className="absolute top-3 right-2 font-mono text-[9px] tracking-widest uppercase text-primary bg-primary/10 px-1.5 py-0.5">
+                              Edited
+                            </span>
+                          )}
+                        </TableCell>
                         <TableCell className="align-top py-4">
                           <div className="flex flex-col gap-1">
                             {row.Sources.map((s, j) => (

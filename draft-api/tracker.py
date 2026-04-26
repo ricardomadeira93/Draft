@@ -130,6 +130,16 @@ def init_db() -> None:
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS api_keys (
+                id TEXT PRIMARY KEY,
+                org_id TEXT NOT NULL,
+                name TEXT NOT NULL,
+                key_hash TEXT UNIQUE NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                last_used_at TIMESTAMP
+            )
+        """)
 
 
 # ─── Uploads ─────────────────────────────────────────────────────────────────

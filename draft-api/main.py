@@ -25,6 +25,8 @@ from tracker import (
     save_document_history, list_document_history, get_document_history_answers
 )
 from auth import get_current_org
+from api_keys import generate_api_key, list_api_keys, revoke_api_key
+from templates import save_template, delete_template, has_template, export_docx
 from fastapi import Depends
 
 app = FastAPI(title="Draft API", description="RAG-powered RFP automation backend")
@@ -191,23 +193,10 @@ async def export_results(body: ExportRequest, user: dict = Depends(get_current_o
             
     elif body.format == "docx":
         try:
-            from docx import Document
-            document = Document()
-            document.add_heading('RFP Answers', 0)
-            
-            for row in body.results:
-                document.add_heading(row.Question, level=1)
-                document.add_paragraph(row.Answer)
-                sources = ", ".join([s.source for s in row.Sources])
-                p = document.add_paragraph()
-                p.add_run(f"Sources: {sources}").italic = True
-                
-            file_stream = io.BytesIO()
-            document.save(file_stream)
-            file_stream.seek(0)
-            
+            rows = [r.model_dump() for r in body.results]
+            docx_bytes = export_docx(user["org_id"], rows)
             return StreamingResponse(
-                file_stream,
+                io.BytesIO(docx_bytes),
                 media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 headers={"Content-Disposition": "attachment; filename=rfp_answers.docx"}
             )
@@ -313,3 +302,108 @@ async def evaluate(body: EvaluateRequest, user: dict = Depends(get_current_org))
         "sources": result["sources"],
         "retrieved_chunks": chunks,
     }
+
+
+# ─── API Keys ────────────────────────────────────────────────────────────────
+
+class CreateKeyRequest(BaseModel):
+    name: str
+
+@app.post("/api-keys")
+def create_key(body: CreateKeyRequest, user: dict = Depends(get_current_org)):
+    """Create a new API key for the org. Returns the plaintext key once."""
+    if not body.name.strip():
+        raise HTTPException(status_code=400, detail="Key name cannot be empty.")
+    return generate_api_key(user["org_id"], body.name.strip())
+
+@app.get("/api-keys")
+def get_keys(user: dict = Depends(get_current_org)):
+    """List all API keys for the org (no plaintext)."""
+    return {"keys": list_api_keys(user["org_id"])}
+
+@app.delete("/api-keys/{key_id}")
+def delete_key(key_id: str, user: dict = Depends(get_current_org)):
+    """Revoke an API key."""
+    if not revoke_api_key(user["org_id"], key_id):
+        raise HTTPException(status_code=404, detail="API key not found.")
+    return {"status": "success"}
+
+
+# ─── MCP Server ───────────────────────────────────────────────────────────────
+
+@app.get("/mcp")
+def mcp_manifest():
+    """MCP server manifest — describes available tools for Claude Desktop / Cursor."""
+    base_url = os.getenv("API_BASE_URL", "http://127.0.0.1:8000")
+    return {
+        "schema_version": "v1",
+        "name": "Draft Knowledge Base",
+        "description": "Query your organization's indexed knowledge base for RFP and security questionnaire answers.",
+        "tools": [
+            {
+                "name": "ask_knowledge_base",
+                "description": "Ask a question against your organization's knowledge base and receive an AI-generated answer with source references.",
+                "input_schema": {
+                    "type": "object",
+                    "properties": {
+                        "question": {"type": "string", "description": "The question to answer"},
+                        "language": {"type": "string", "description": "Response language (e.g. English, Portuguese)", "default": "English"}
+                    },
+                    "required": ["question"]
+                },
+                "url": f"{base_url}/mcp"
+            }
+        ]
+    }
+
+class MCPInvokeRequest(BaseModel):
+    tool: str
+    input: dict
+
+@app.post("/mcp")
+async def mcp_invoke(body: MCPInvokeRequest, user: dict = Depends(get_current_org)):
+    """MCP tool invocation — routes tool calls to the appropriate endpoint."""
+    if body.tool != "ask_knowledge_base":
+        raise HTTPException(status_code=400, detail=f"Unknown tool: {body.tool}")
+
+    question = body.input.get("question", "").strip()
+    language = body.input.get("language", "English")
+
+    if not question:
+        raise HTTPException(status_code=422, detail="question is required")
+
+    result = await answer_question_with_sources(question, language, user["org_id"])
+    return {
+        "content": [
+            {
+                "type": "text",
+                "text": result["answer"]
+            }
+        ],
+        "sources": result["sources"]
+    }
+
+
+# ─── DOCX Template Management ─────────────────────────────────────────────────
+
+@app.post("/template")
+async def upload_template(file: UploadFile = File(...), user: dict = Depends(get_current_org)):
+    """Upload a branded .docx template for the org."""
+    if not file.filename.endswith(".docx"):
+        raise HTTPException(status_code=400, detail="Only .docx files are accepted as templates.")
+    content = await file.read()
+    save_template(user["org_id"], content)
+    return {"status": "success", "message": "Template saved."}
+
+@app.get("/template")
+def get_template_status(user: dict = Depends(get_current_org)):
+    """Check whether the org has a custom template uploaded."""
+    return {"has_template": has_template(user["org_id"])}
+
+@app.delete("/template")
+def remove_template(user: dict = Depends(get_current_org)):
+    """Remove the org's custom template (revert to default)."""
+    deleted = delete_template(user["org_id"])
+    if not deleted:
+        raise HTTPException(status_code=404, detail="No custom template found.")
+    return {"status": "success"}

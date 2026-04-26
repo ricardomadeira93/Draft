@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
-import "./globals.css";
+import "../globals.css";
 
 const ibmPlexSans = IBM_Plex_Sans({
   variable: "--font-sans",

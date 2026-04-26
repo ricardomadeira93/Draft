@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
-import { Upload, CheckCircle2, Trash2, FileText, Loader2 } from "lucide-react";
+import { Upload, CheckCircle2, Trash2, FileText, Loader2, FileType2 } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
 
@@ -25,25 +25,34 @@ export default function KnowledgeBase() {
   const { getToken, orgId } = useAuth();
   const t = useTranslations("Setup");
 
+  const [hasTemplate, setHasTemplate] = useState(false);
+  const [templateFile, setTemplateFile] = useState<File | null>(null);
+  const [uploadingTemplate, setUploadingTemplate] = useState(false);
+  const [removingTemplate, setRemovingTemplate] = useState(false);
+
   const fetchFiles = useCallback(async () => {
     try {
       const token = await getToken();
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
-      const res = await fetch(`${API_URL}/kb/files`, {
-        cache: "no-store",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          ...(orgId && { "X-Org-Id": orgId })
-        }
-      });
-      const data = await res.json();
-      setKbFiles(data.files ?? []);
+      const [filesRes, templateRes] = await Promise.all([
+        fetch(`${API_URL}/kb/files`, {
+          cache: "no-store",
+          headers: { "Authorization": `Bearer ${token}`, ...(orgId && { "X-Org-Id": orgId }) }
+        }),
+        fetch(`${API_URL}/template`, {
+          cache: "no-store",
+          headers: { "Authorization": `Bearer ${token}`, ...(orgId && { "X-Org-Id": orgId }) }
+        })
+      ]);
+      const [filesData, templateData] = await Promise.all([filesRes.json(), templateRes.json()]);
+      setKbFiles(filesData.files ?? []);
+      setHasTemplate(templateData.has_template ?? false);
     } catch {
       // backend may not be running yet
     } finally {
       setLoadingFiles(false);
     }
-  }, []);
+  }, [getToken, orgId]);
 
   useEffect(() => { fetchFiles(); }, [fetchFiles]);
 
@@ -244,6 +253,91 @@ export default function KnowledgeBase() {
               </Table>
             </div>
           )}
+        </div>
+        {/* Branded Template */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">
+              Branded DOCX Template
+            </p>
+            {hasTemplate && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="font-mono text-[10px] tracking-widest uppercase text-destructive hover:text-destructive hover:bg-transparent rounded-none h-auto py-0 px-0"
+                onClick={async () => {
+                  setRemovingTemplate(true);
+                  try {
+                    const token = await getToken();
+                    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+                    await fetch(`${API_URL}/template`, {
+                      method: "DELETE",
+                      headers: { "Authorization": `Bearer ${token}`, ...(orgId && { "X-Org-Id": orgId }) }
+                    });
+                    setHasTemplate(false);
+                    setTemplateFile(null);
+                  } catch { alert("Failed to remove template."); }
+                  finally { setRemovingTemplate(false); }
+                }}
+                disabled={removingTemplate}
+              >
+                {removingTemplate ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : null}
+                Remove template
+              </Button>
+            )}
+          </div>
+
+          <div className="bg-card p-6 space-y-4">
+            {hasTemplate ? (
+              <div className="flex items-center gap-3 text-primary">
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
+                <p className="text-xs font-mono">Custom branded template active. DOCX exports will use your template.</p>
+              </div>
+            ) : (
+              <p className="text-xs font-mono text-muted-foreground">
+                Upload a <code className="bg-muted px-1">.docx</code> file with{" "}
+                <code className="bg-muted px-1">{"{{Question}}"}</code>,{" "}
+                <code className="bg-muted px-1">{"{{Answer}}"}</code>, and{" "}
+                <code className="bg-muted px-1">{"{{Sources}}"}</code> placeholders.
+                The AI will fill them in on each export.
+              </p>
+            )}
+
+            <div className="flex items-center gap-3">
+              <Input
+                type="file"
+                accept=".docx"
+                className="max-w-xs bg-transparent border-0 text-sm font-mono text-muted-foreground"
+                onChange={e => setTemplateFile(e.target.files?.[0] || null)}
+              />
+              <Button
+                size="sm"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase rounded-none h-9 px-4 gap-2"
+                onClick={async () => {
+                  if (!templateFile) return;
+                  setUploadingTemplate(true);
+                  try {
+                    const token = await getToken();
+                    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+                    const fd = new FormData();
+                    fd.append("file", templateFile);
+                    const res = await fetch(`${API_URL}/template`, {
+                      method: "POST",
+                      body: fd,
+                      headers: { "Authorization": `Bearer ${token}`, ...(orgId && { "X-Org-Id": orgId }) }
+                    });
+                    if (res.ok) { setHasTemplate(true); setTemplateFile(null); }
+                    else alert("Upload failed.");
+                  } catch { alert("Error uploading template."); }
+                  finally { setUploadingTemplate(false); }
+                }}
+                disabled={!templateFile || uploadingTemplate}
+              >
+                {uploadingTemplate ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileType2 className="h-3.5 w-3.5" />}
+                {hasTemplate ? "Replace" : "Upload"}
+              </Button>
+            </div>
+          </div>
         </div>
       </main>
     </div>
