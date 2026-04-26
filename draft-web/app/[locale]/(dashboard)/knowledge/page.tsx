@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { toast } from "sonner";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -60,10 +61,10 @@ export default function KnowledgeBase() {
         setFile(null);
         await fetchFiles();
       } else {
-        alert("Upload failed. Check server logs.");
+        toast.error("Upload failed", { description: "Please try again." });
       }
     } catch {
-      alert("Error connecting to the backend. Is FastAPI running?");
+      toast.error("Connection failed", { description: "Could not reach the server." });
     } finally {
       setUploading(false);
     }
@@ -81,10 +82,10 @@ export default function KnowledgeBase() {
         await fetchFiles();
       } else {
         const data = await res.json();
-        alert(data.detail ?? "Delete failed.");
+        toast.error("Delete failed", { description: data.detail ?? "Please try again." });
       }
     } catch {
-      alert("Error connecting to the backend. Is FastAPI running?");
+      toast.error("Connection failed", { description: "Could not reach the server." });
     } finally {
       setDeletingFile(null);
     }

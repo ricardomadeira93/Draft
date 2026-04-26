@@ -18,6 +18,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { ClerkProvider } from "@clerk/nextjs";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Draft | Response Engine",
@@ -71,6 +72,7 @@ export default async function RootLayout(props: {
             <NextIntlClientProvider messages={messages}>
               {props.children}
             </NextIntlClientProvider>
+            <Toaster position="bottom-right" />
           </ThemeProvider>
         </body>
       </html>

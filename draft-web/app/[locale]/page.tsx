@@ -2,11 +2,14 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Compass, Database, FileText, Search, ArrowRight, Zap, Shield, BarChart3 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
+import { getTranslations } from "next-intl/server";
 
 export default async function Home() {
   const { userId } = await auth();
+  const t = await getTranslations("Landing");
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground selection:bg-primary/20">
@@ -20,18 +23,19 @@ export default async function Home() {
           </div>
           <div className="flex items-center gap-8">
             <Link href="/inspect" className="font-mono text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors hidden sm:block">
-              Answer Inspector
+              {t("nav_inspector")}
             </Link>
             <Link href="/setup" className="font-mono text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors hidden sm:block">
-              Knowledge Library
+              {t("nav_library")}
             </Link>
             <div className="flex items-center gap-4 border-l border-border pl-4">
               <ThemeToggle />
+              <LanguageSwitcher />
               {userId ? (
                 <>
                   <Link href="/dashboard">
                     <Button size="sm" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-6 h-9">
-                      App →
+                      {t("open_workspace")} →
                     </Button>
                   </Link>
                   <UserButton />
@@ -39,7 +43,7 @@ export default async function Home() {
               ) : (
                 <SignInButton mode="modal">
                   <Button variant="ghost" size="sm" className="font-mono text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground rounded-none">
-                    Log In
+                    {t("login")}
                   </Button>
                 </SignInButton>
               )}
@@ -51,36 +55,36 @@ export default async function Home() {
       {/* ── Hero ── */}
       <section className="flex flex-col items-start justify-center max-w-5xl mx-auto px-8 pt-32 pb-24 border-b border-border w-full">
         <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-primary mb-6">
-          Portfolio Project · Full-Stack AI Engineering
+          {t("hero_tag")}
         </p>
 
         <h1 className="text-4xl md:text-6xl font-light tracking-tight leading-[1.1] max-w-4xl">
-          Sales teams lose <span className="text-primary font-normal">40+ hours</span><br />
-          per RFP.<br />
-          I built the fix.
+          {t("hero_title_1")}<span className="text-primary font-normal">{t("hero_title_highlight")}</span><br />
+          {t("hero_title_2")}<br />
+          {t("hero_title_3")}
         </h1>
 
         <p className="mt-8 text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed font-light">
-          Draft is a production-grade RAG system that ingests company knowledge bases into a vector database and auto-fills security questionnaires and RFPs in minutes — not weeks.
+          {t("hero_desc")}
         </p>
 
         <div className="mt-12 flex flex-col sm:flex-row gap-4">
           {userId ? (
             <Link href="/dashboard">
               <Button size="lg" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-8 h-12">
-                Open Workspace
+                {t("open_workspace")}
               </Button>
             </Link>
           ) : (
             <SignUpButton mode="modal">
               <Button size="lg" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-8 h-12">
-                Start for Free
+                {t("start_free")}
               </Button>
             </SignUpButton>
           )}
           <Link href="/inspect">
             <Button size="lg" variant="ghost" className="rounded-none font-mono text-xs tracking-widest uppercase px-8 h-12 text-muted-foreground hover:text-foreground">
-              Inspect the AI
+              {t("inspect_ai")}
             </Button>
           </Link>
         </div>
@@ -90,9 +94,9 @@ export default async function Home() {
       <section className="py-24 border-b border-border bg-card">
         <div className="max-w-5xl mx-auto px-8">
           <div className="mb-16">
-            <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-primary mb-4">The Problem</p>
+            <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-primary mb-4">{t("problem_tag")}</p>
             <h2 className="text-3xl font-light tracking-tight">
-              RFPs are a $10B problem hiding in plain sight.
+              {t("problem_title")}
             </h2>
           </div>
 
@@ -100,18 +104,18 @@ export default async function Home() {
             {[
               {
                 stat: "40+",
-                unit: "hours",
-                label: "Average time a sales engineer spends on a single RFP response",
+                unit: t("stat_1_unit"),
+                label: t("stat_1_label"),
               },
               {
                 stat: "60%",
                 unit: "",
-                label: "Of RFP questions are repeated across different questionnaires",
+                label: t("stat_2_label"),
               },
               {
                 stat: "$200K+",
                 unit: "",
-                label: "Annual cost of dedicated RFP response staff at a mid-market company",
+                label: t("stat_3_label"),
               },
             ].map((item) => (
               <div key={item.stat} className="bg-card p-10 flex flex-col items-start">
@@ -130,12 +134,12 @@ export default async function Home() {
       <section className="py-24 border-b border-border">
         <div className="max-w-5xl mx-auto px-8">
           <div className="mb-16">
-            <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-primary mb-4">The Architecture</p>
+            <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-primary mb-4">{t("arch_tag")}</p>
             <h2 className="text-3xl font-light tracking-tight mb-4">
-              Not a ChatGPT wrapper.
+              {t("arch_title")}
             </h2>
             <p className="text-muted-foreground text-sm font-light max-w-2xl">
-              Every design decision was made deliberately. Here is why each component exists.
+              {t("arch_desc")}
             </p>
           </div>
 
@@ -143,27 +147,27 @@ export default async function Home() {
             {[
               {
                 icon: <Database className="h-5 w-5 text-primary shrink-0" />,
-                title: "Pinecone Vector Database",
-                why: "Why not SQLite/Postgres?",
-                body: "RFP answers require semantic similarity search, not keyword matching. Pinecone provides ANN search at sub-10ms latency across millions of embeddings — no self-hosted infrastructure needed.",
+                title: t("arch_1_title"),
+                why: t("arch_1_why"),
+                body: t("arch_1_body"),
               },
               {
                 icon: <Zap className="h-5 w-5 text-primary shrink-0" />,
-                title: "RAG over Fine-tuning",
-                why: "Why not fine-tune Llama3?",
-                body: "Fine-tuning encodes knowledge into weights — so every time your policies change, you retrain. RAG reads from a live vector store, making updates instant and free.",
+                title: t("arch_2_title"),
+                why: t("arch_2_why"),
+                body: t("arch_2_body"),
               },
               {
                 icon: <Shield className="h-5 w-5 text-primary shrink-0" />,
-                title: "1000-token chunks, 200 overlap",
-                why: "Why this chunking strategy?",
-                body: "Smaller chunks increase retrieval precision. The 200-token overlap ensures context is not lost at boundaries — a key reason RAG systems fail in naive implementations.",
+                title: t("arch_3_title"),
+                why: t("arch_3_why"),
+                body: t("arch_3_body"),
               },
               {
                 icon: <BarChart3 className="h-5 w-5 text-primary shrink-0" />,
-                title: "Source Attribution",
-                why: "Why does this matter?",
-                body: "Every answer shows which document it came from. This prevents hallucination from going undetected and makes the system auditable — a hard requirement for enterprise security teams.",
+                title: t("arch_4_title"),
+                why: t("arch_4_why"),
+                body: t("arch_4_body"),
               },
             ].map((item) => (
               <div key={item.title} className="flex flex-col items-start gap-4 group">
@@ -185,8 +189,8 @@ export default async function Home() {
       <section className="py-24 border-b border-border bg-card">
         <div className="max-w-5xl mx-auto px-8">
           <div className="mb-16">
-            <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-primary mb-4">How it works</p>
-            <h2 className="text-3xl font-light tracking-tight">Three steps. Minutes, not weeks.</h2>
+            <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-primary mb-4">{t("how_tag")}</p>
+            <h2 className="text-3xl font-light tracking-tight">{t("how_title")}</h2>
           </div>
 
           <div className="grid md:grid-cols-3 gap-px bg-border">
@@ -194,26 +198,26 @@ export default async function Home() {
               {
                 step: "01",
                 icon: <Database className="h-5 w-5 text-primary shrink-0" />,
-                title: "Build your Knowledge Library",
-                body: "Upload policies, security docs, and past RFPs. The system safely stores them so the AI can read them later.",
+                title: t("how_1_title"),
+                body: t("how_1_body"),
                 href: "/setup",
-                cta: "Manage library",
+                cta: t("how_1_cta"),
               },
               {
                 step: "02",
                 icon: <FileText className="h-5 w-5 text-primary shrink-0" />,
-                title: "Upload the Questionnaire",
-                body: "Drop in a CSV of questions. Our Response Engine instantly finds the right context and writes a professional, accurate answer.",
+                title: t("how_2_title"),
+                body: t("how_2_body"),
                 href: "/respond",
-                cta: "Try it now",
+                cta: t("how_2_cta"),
               },
               {
                 step: "03",
                 icon: <Search className="h-5 w-5 text-primary shrink-0" />,
-                title: "Review & Verify",
-                body: "Review every answer with its exact reference document before downloading. The Answer Inspector shows exactly how the AI thought.",
+                title: t("how_3_title"),
+                body: t("how_3_body"),
                 href: "/inspect",
-                cta: "Open inspector",
+                cta: t("how_3_cta"),
               },
             ].map((item) => (
               <div key={item.step} className="bg-card p-8 flex flex-col justify-between group h-full">
@@ -240,7 +244,7 @@ export default async function Home() {
       <section className="py-12 border-b border-border bg-background">
         <div className="max-w-5xl mx-auto px-8">
           <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
-            <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground">Stack</span>
+            <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-muted-foreground">{t("stack_tag")}</span>
             {[
               "FastAPI", "LangChain", "Pinecone", "Llama 3",
               "Next.js 15", "TypeScript", "Tailwind CSS", "SQLite",
@@ -257,28 +261,28 @@ export default async function Home() {
       <section className="py-24 bg-card">
         <div className="max-w-5xl mx-auto px-8 flex flex-col md:flex-row items-start justify-between gap-12">
           <div>
-            <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-primary mb-4">Ready to see it?</p>
+            <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-primary mb-4">{t("cta_tag")}</p>
             <h2 className="text-3xl font-light tracking-tight">
-              Built by someone who<br /> understands the full stack.
+              {t("cta_title_1")}<br /> {t("cta_title_2")}
             </h2>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 shrink-0">
             {userId ? (
               <Link href="/dashboard">
                 <Button size="lg" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-8 h-12">
-                  Open Workspace
+                  {t("open_workspace")}
                 </Button>
               </Link>
             ) : (
               <SignUpButton mode="modal">
                 <Button size="lg" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-8 h-12">
-                  Get Started Now
+                  {t("cta_get_started")}
                 </Button>
               </SignUpButton>
             )}
             <Link href="/inspect">
               <Button size="lg" variant="ghost" className="rounded-none font-mono text-xs tracking-widest uppercase px-8 h-12 text-muted-foreground hover:text-foreground">
-                Inspect the AI
+                {t("inspect_ai")}
               </Button>
             </Link>
           </div>

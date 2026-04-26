@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Loader2, FileText, ChevronDown, ChevronRight } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
+import { toast } from "sonner";
 
 interface Source { source: string; snippet: string; }
 interface Chunk { source: string; text: string; rank: number; }
@@ -67,7 +68,7 @@ export default function EvaluatePage() {
       if (!res.ok) throw new Error("Backend error.");
       setResult(await res.json());
     } catch {
-      alert("Error connecting to the backend. Is FastAPI running?");
+      toast.error("Connection failed", { description: "Could not reach the server." });
     } finally {
       setLoading(false);
     }

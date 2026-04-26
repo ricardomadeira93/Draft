@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { ArrowLeft, FileText, Download, Loader2, FileCheck } from "lucide-react";
+import { toast } from "sonner";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 interface Source { source: string; snippet: string; }
@@ -46,7 +47,7 @@ export default function Workspace() {
       const data = await res.json();
       setResults(data.results ?? []);
     } catch {
-      alert("Error connecting to the backend. Check server logs.");
+      toast.error("Connection failed", { description: "Could not reach the server." });
     } finally {
       setLoading(false);
     }

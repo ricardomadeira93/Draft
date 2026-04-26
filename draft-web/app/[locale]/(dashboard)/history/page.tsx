@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Loader2, Download, FileText, Share2 } from "lucide-react";
+import { toast } from "sonner";
 import { useAuth } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
 
@@ -102,7 +103,7 @@ export default function HistoryPage() {
         URL.revokeObjectURL(url); document.body.removeChild(a);
       }
     } catch (e) {
-      alert("Failed to download history. Please try again.");
+      toast.error("Export failed", { description: "Please try again." });
     } finally {
       setDownloadingId(null);
     }
@@ -135,9 +136,9 @@ export default function HistoryPage() {
       const shareData = await shareRes.json();
       const shareUrl = `${window.location.origin}/review/${shareData.token}`;
       await navigator.clipboard.writeText(shareUrl);
-      alert("Share Link Copied to Clipboard!");
+      toast.success("Link copied to clipboard");
     } catch (e) {
-      alert("Share failed.");
+      toast.error("Share failed", { description: "Please try again." });
     } finally {
       setDownloadingId(null);
     }

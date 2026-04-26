@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -57,7 +58,7 @@ export default function EvaluatePage() {
       if (!res.ok) throw new Error("Backend error.");
       setResult(await res.json());
     } catch {
-      alert("Error connecting to the backend. Is FastAPI running?");
+      toast.error("Connection failed", { description: "Could not reach the server." });
     } finally {
       setLoading(false);
     }

@@ -7,6 +7,7 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 import { Upload, CheckCircle2, Trash2, FileText, Loader2, FileType2 } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 interface KBFile {
   filename: string;
@@ -74,10 +75,10 @@ export default function KnowledgeBase() {
         }
       });
       const data = await res.json();
-      if (res.ok) { setSuccessMsg(data.message); setFile(null); await fetchFiles(); }
-      else alert("Upload failed. Check server logs.");
+      if (res.ok) { setSuccessMsg(data.message); setFile(null); await fetchFiles(); toast.success("Document uploaded"); }
+      else toast.error("Upload failed", { description: "Please try again." });
     } catch {
-      alert("Error connecting to the backend. Is FastAPI running?");
+      toast.error("Connection failed", { description: "Could not reach the server." });
     } finally {
       setUploading(false);
     }
@@ -105,10 +106,10 @@ export default function KnowledgeBase() {
         }
       });
       const data = await uploadRes.json();
-      if (uploadRes.ok) { setSuccessMsg(data.message); await fetchFiles(); }
-      else alert("Sample upload failed. Check server logs.");
+      if (uploadRes.ok) { setSuccessMsg(data.message); await fetchFiles(); toast.success("Sample document loaded"); }
+      else toast.error("Upload failed", { description: "Please try again." });
     } catch {
-      alert("Error uploading sample data. Is FastAPI running?");
+      toast.error("Connection failed", { description: "Could not reach the server." });
     } finally {
       setUploading(false);
     }
@@ -126,10 +127,10 @@ export default function KnowledgeBase() {
           ...(orgId && { "X-Org-Id": orgId })
         }
       });
-      if (res.ok) await fetchFiles();
-      else { const data = await res.json(); alert(data.detail ?? "Delete failed."); }
+      if (res.ok) { await fetchFiles(); toast.success("Document removed"); }
+      else { const data = await res.json(); toast.error("Delete failed", { description: data.detail ?? "Please try again." }); }
     } catch {
-      alert("Error connecting to the backend. Is FastAPI running?");
+      toast.error("Connection failed", { description: "Could not reach the server." });
     } finally {
       setDeletingFile(null);
     }
@@ -276,7 +277,7 @@ export default function KnowledgeBase() {
                     });
                     setHasTemplate(false);
                     setTemplateFile(null);
-                  } catch { alert("Failed to remove template."); }
+                  } catch { toast.error("Failed to remove template"); }
                   finally { setRemovingTemplate(false); }
                 }}
                 disabled={removingTemplate}
@@ -326,9 +327,9 @@ export default function KnowledgeBase() {
                       body: fd,
                       headers: { "Authorization": `Bearer ${token}`, ...(orgId && { "X-Org-Id": orgId }) }
                     });
-                    if (res.ok) { setHasTemplate(true); setTemplateFile(null); }
-                    else alert("Upload failed.");
-                  } catch { alert("Error uploading template."); }
+                    if (res.ok) { setHasTemplate(true); setTemplateFile(null); toast.success("Template saved"); }
+                    else toast.error("Upload failed", { description: "Please try again." });
+                  } catch { toast.error("Connection failed", { description: "Could not reach the server." }); }
                   finally { setUploadingTemplate(false); }
                 }}
                 disabled={!templateFile || uploadingTemplate}

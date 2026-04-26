@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Key, Plus, Trash2, Loader2, Copy, Check, Eye, EyeOff } from "lucide-react";
+import { toast } from "sonner";
 
 interface APIKey {
   id: string;
@@ -108,7 +109,7 @@ export default function SettingsPage() {
       setCreatedKey(data.key);
       setNewKeyName("");
       await fetchKeys();
-    } catch { alert("Failed to create key."); }
+    } catch { toast.error("Failed to create key", { description: "Please try again." }); }
     finally { setCreating(false); }
   };
 
@@ -118,7 +119,7 @@ export default function SettingsPage() {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
       await fetch(`${API_URL}/api-keys/${id}`, { method: "DELETE", headers: await authHeaders() });
       await fetchKeys();
-    } catch { alert("Failed to revoke key."); }
+    } catch { toast.error("Failed to revoke key", { description: "Please try again." }); }
     finally { setRevokingId(null); }
   };
 

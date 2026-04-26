@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Check, Flag, Loader2, Compass } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { toast } from "sonner";
 
 interface Source {
   source: string;
@@ -74,7 +75,7 @@ export default function ReviewPage() {
         return copy;
       });
     } catch (e) {
-      alert("Failed to save review status. Please try again.");
+      toast.error("Could not save", { description: "Please try again." });
     } finally {
       setUpdating(null);
     }

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { FileText, Download, Loader2, FileCheck } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
+import { toast } from "sonner";
 
 interface Source { source: string; snippet: string; }
 interface QARow { Question: string; Answer: string; Sources: Source[]; }
@@ -50,7 +51,7 @@ async function handleExportDoc(results: QARow[], format: "pdf" | "docx", origina
     document.body.appendChild(a); a.click();
     URL.revokeObjectURL(url); document.body.removeChild(a);
   } catch (e) {
-    alert("Export failed. Ensure backend has weasyprint/python-docx installed.");
+    toast.error("Export failed", { description: "Could not generate the file. Please try again." });
   } finally {
     setExporting(false);
   }
@@ -76,9 +77,10 @@ async function handleShare(results: QARow[], setSharing: (state: boolean) => voi
     const shareUrl = `${window.location.origin}/review/${data.token}`;
     await navigator.clipboard.writeText(shareUrl);
     setShared(true);
+    toast.success("Link copied to clipboard");
     setTimeout(() => setShared(false), 3000);
   } catch (e) {
-    alert("Share failed. Please check server logs.");
+    toast.error("Share failed", { description: "Could not generate a share link. Please try again." });
   } finally {
     setSharing(false);
   }
@@ -229,7 +231,7 @@ export default function Workspace() {
       const data = await res.json();
       setResults(data.results ?? []);
     } catch {
-      alert("Error connecting to the backend. Check server logs.");
+      toast.error("Connection failed", { description: "Could not reach the server. Please try again." });
     } finally {
       setLoading(false);
     }
