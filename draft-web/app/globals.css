@@ -48,7 +48,7 @@
     --border: 0 0% 90%;              /* #E5E5E5 very subtle */
     --input: 0 0% 90%;
     --ring: 22 100% 50%;             /* orange focus ring */
-    --radius: 0.25rem;               /* sharp, minimal */
+    --radius: 0rem;               /* zero roundness */
   }
 
   .dark {
