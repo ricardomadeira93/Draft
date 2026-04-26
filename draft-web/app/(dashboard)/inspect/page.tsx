@@ -45,7 +45,7 @@ export default function EvaluatePage() {
   const [question, setQuestion] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<EvalResult | null>(null);
-  const { getToken } = useAuth();
+  const { getToken, orgId } = useAuth();
 
   const handleEvaluate = async () => {
     const q = question.trim();
@@ -59,7 +59,8 @@ export default function EvaluatePage() {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
+          "Authorization": `Bearer ${token}`,
+          ...(orgId && { "X-Org-Id": orgId })
         },
         body: JSON.stringify({ question: q }),
       });

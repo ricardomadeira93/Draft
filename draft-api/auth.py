@@ -1,15 +1,16 @@
 import os
 import jwt
-from fastapi import HTTPException, Depends
+from fastapi import HTTPException, Depends, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 security = HTTPBearer()
 
-def get_current_org(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
+def get_current_org(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    x_org_id: str = Header(None, alias="X-Org-Id")
+) -> dict:
     """
-    Extracts the user_id and org_id from the Clerk JWT.
-    Note: For a true production environment, you must verify the JWT signature 
-    against Clerk's JWKS endpoint using pyjwt or the Clerk SDK.
+    Extracts the user_id and org_id. Falls back to X-Org-Id header if JWT is missing it.
     """
     token = credentials.credentials
     try:
@@ -17,10 +18,11 @@ def get_current_org(credentials: HTTPAuthorizationCredentials = Depends(security
         # In production: jwt.decode(token, key=jwks_key, algorithms=["RS256"], audience="...")
         payload = jwt.decode(token, options={"verify_signature": False})
         
-        print(f"Decoded JWT Payload: {payload}")
-        
         user_id = payload.get("sub")
-        org_id = payload.get("org_id")
+        
+        # In newer Clerk versions, org_id might require a custom JWT template.
+        # As a fallback for this prototype, we accept it via a custom header.
+        org_id = payload.get("org_id") or x_org_id
         
         if not user_id:
             raise HTTPException(status_code=401, detail="Invalid token: missing subject (user_id)")

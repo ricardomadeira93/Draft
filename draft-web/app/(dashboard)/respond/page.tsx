@@ -26,7 +26,7 @@ function downloadCSV(rows: QARow[], filename: string) {
   URL.revokeObjectURL(url); document.body.removeChild(a);
 }
 
-async function handleExportDoc(results: QARow[], format: "pdf" | "docx", originalFilename: string, setExporting: (state: boolean) => void, getToken: () => Promise<string | null>) {
+async function handleExportDoc(results: QARow[], format: "pdf" | "docx", originalFilename: string, setExporting: (state: boolean) => void, getToken: () => Promise<string | null>, orgId: string | null | undefined) {
   setExporting(true);
   try {
     const token = await getToken();
@@ -35,7 +35,8 @@ async function handleExportDoc(results: QARow[], format: "pdf" | "docx", origina
       method: "POST",
       headers: { 
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
+        "Authorization": `Bearer ${token}`,
+        ...(orgId && { "X-Org-Id": orgId })
       },
       body: JSON.stringify({ results, format })
     });
@@ -55,7 +56,7 @@ async function handleExportDoc(results: QARow[], format: "pdf" | "docx", origina
   }
 }
 
-async function handleShare(results: QARow[], setSharing: (state: boolean) => void, setShared: (state: boolean) => void, getToken: () => Promise<string | null>) {
+async function handleShare(results: QARow[], setSharing: (state: boolean) => void, setShared: (state: boolean) => void, getToken: () => Promise<string | null>, orgId: string | null | undefined) {
   setSharing(true);
   try {
     const token = await getToken();
@@ -64,7 +65,8 @@ async function handleShare(results: QARow[], setSharing: (state: boolean) => voi
       method: "POST",
       headers: { 
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
+        "Authorization": `Bearer ${token}`,
+        ...(orgId && { "X-Org-Id": orgId })
       },
       body: JSON.stringify({ results })
     });
@@ -179,7 +181,7 @@ export default function Workspace() {
   const [language, setLanguage] = useState("English");
   const [results, setResults] = useState<QARow[] | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const { getToken } = useAuth();
+  const { getToken, orgId } = useAuth();
 
   // Parse row count whenever file changes
   useEffect(() => {
@@ -212,7 +214,8 @@ export default function Workspace() {
         method: "POST", 
         body: formData,
         headers: {
-          "Authorization": `Bearer ${token}`
+          "Authorization": `Bearer ${token}`,
+          ...(orgId && { "X-Org-Id": orgId })
         }
       });
       if (!res.ok) throw new Error("Backend error.");
@@ -324,7 +327,7 @@ export default function Workspace() {
                   variant="outline"
                   size="sm"
                   className="font-mono text-xs tracking-widest uppercase rounded-none gap-2 h-8 border-border"
-                  onClick={() => handleShare(results, setSharing, setShared, getToken)}
+                  onClick={() => handleShare(results, setSharing, setShared, getToken, orgId)}
                   disabled={sharing || shared}
                 >
                   {sharing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
@@ -335,7 +338,7 @@ export default function Workspace() {
                   variant="ghost"
                   size="sm"
                   className="font-mono text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground rounded-none gap-2 hover:bg-transparent"
-                  onClick={() => handleExportDoc(results, "pdf", file?.name ?? "rfp.csv", setExporting, getToken)}
+                  onClick={() => handleExportDoc(results, "pdf", file?.name ?? "rfp.csv", setExporting, getToken, orgId)}
                   disabled={exporting}
                 >
                   {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
@@ -345,7 +348,7 @@ export default function Workspace() {
                   variant="ghost"
                   size="sm"
                   className="font-mono text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground rounded-none gap-2 hover:bg-transparent"
-                  onClick={() => handleExportDoc(results, "docx", file?.name ?? "rfp.csv", setExporting, getToken)}
+                  onClick={() => handleExportDoc(results, "docx", file?.name ?? "rfp.csv", setExporting, getToken, orgId)}
                   disabled={exporting}
                 >
                   {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}

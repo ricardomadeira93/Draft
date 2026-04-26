@@ -21,7 +21,7 @@ export default function KnowledgeBase() {
   const [loadingFiles, setLoadingFiles] = useState(true);
   const [deletingFile, setDeletingFile] = useState<string | null>(null);
 
-  const { getToken } = useAuth();
+  const { getToken, orgId } = useAuth();
 
   const fetchFiles = useCallback(async () => {
     try {
@@ -29,7 +29,8 @@ export default function KnowledgeBase() {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
       const res = await fetch(`${API_URL}/kb/files`, {
         headers: {
-          "Authorization": `Bearer ${token}`
+          "Authorization": `Bearer ${token}`,
+          ...(orgId && { "X-Org-Id": orgId })
         }
       });
       const data = await res.json();
@@ -56,7 +57,8 @@ export default function KnowledgeBase() {
         method: "POST", 
         body: formData,
         headers: {
-          "Authorization": `Bearer ${token}`
+          "Authorization": `Bearer ${token}`,
+          ...(orgId && { "X-Org-Id": orgId })
         }
       });
       const data = await res.json();
@@ -86,7 +88,8 @@ export default function KnowledgeBase() {
         method: "POST", 
         body: formData,
         headers: {
-          "Authorization": `Bearer ${token}`
+          "Authorization": `Bearer ${token}`,
+          ...(orgId && { "X-Org-Id": orgId })
         }
       });
       const data = await uploadRes.json();
@@ -107,7 +110,8 @@ export default function KnowledgeBase() {
       const res = await fetch(`${API_URL}/kb/files/${encodeURIComponent(filename)}`, { 
         method: "DELETE",
         headers: {
-          "Authorization": `Bearer ${token}`
+          "Authorization": `Bearer ${token}`,
+          ...(orgId && { "X-Org-Id": orgId })
         }
       });
       if (res.ok) await fetchFiles();
