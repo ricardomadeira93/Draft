@@ -119,7 +119,7 @@ export default function EvaluatePage() {
             <div className="space-y-3">
               <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">Generated Answer</p>
               <div className="bg-card p-6">
-                <p className="text-sm text-foreground leading-relaxed font-light">{result.answer}</p>
+                <p className="text-base text-foreground/90 leading-relaxed">{result.answer}</p>
               </div>
             </div>
 

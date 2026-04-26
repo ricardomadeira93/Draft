@@ -384,7 +384,7 @@ export default function Workspace() {
                     {results.map((row, i) => (
                       <TableRow key={i} className="border-0 hover:bg-accent/30 align-top">
                         <TableCell className="font-mono text-sm text-foreground align-top py-4">{row.Question}</TableCell>
-                        <TableCell className="text-sm text-muted-foreground leading-relaxed align-top py-4 font-light">{row.Answer}</TableCell>
+                        <TableCell className="text-base text-foreground/90 leading-relaxed align-top py-4">{row.Answer}</TableCell>
                         <TableCell className="align-top py-4">
                           <div className="flex flex-col gap-1">
                             {row.Sources.map((s, j) => (
