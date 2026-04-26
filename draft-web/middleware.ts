@@ -5,11 +5,15 @@ import { routing } from './routing';
 const intlMiddleware = createMiddleware(routing);
 
 const isProtectedRoute = createRouteMatcher([
+  '/:locale/dashboard(.*)',
   '/:locale/setup(.*)',
   '/:locale/respond(.*)',
   '/:locale/inspect(.*)',
   '/:locale/history(.*)',
-  '/:locale/team(.*)'
+  '/:locale/team(.*)',
+  '/:locale/settings(.*)',
+  '/:locale/knowledge(.*)',
+  '/:locale/workspace(.*)',
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
