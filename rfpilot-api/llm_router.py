@@ -6,8 +6,9 @@ from langchain_pinecone import PineconeEmbeddings
 
 def get_embedding_model():
     """
-    Turns our text (PDF, CSVs) into arrays of numbers (vectors).
-    If GROQ_API_KEY is present, we assume cloud mode and use Pinecone's serverless embeddings.
+    Returns the appropriate embedding model based on environment configuration.
+    Defaults to Pinecone serverless embeddings if GROQ_API_KEY is present,
+    otherwise uses local Ollama embeddings.
     """
     if os.getenv("GROQ_API_KEY"):
         return PineconeEmbeddings(model="multilingual-e5-large")
@@ -16,8 +17,8 @@ def get_embedding_model():
     
 def get_llm():
     """
-    The "Brain" that will read the client's question and write the final answer.
-    If GROQ_API_KEY is present, we use Groq's insanely fast cloud API.
+    Returns the appropriate LLM instance based on environment configuration.
+    Defaults to Groq if GROQ_API_KEY is present, otherwise uses local Ollama.
     """
     if os.getenv("GROQ_API_KEY"):
         return ChatGroq(model="llama3-8b-8192")

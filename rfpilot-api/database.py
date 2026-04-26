@@ -1,9 +1,5 @@
 """
 database.py — Lazy Pinecone client initialization.
-
-Previously, the Pinecone connection was made at module import time,
-which caused the server to hang if the network was slow or the API key
-wasn't loaded yet. Now the client is built on first access.
 """
 
 import os
