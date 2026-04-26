@@ -6,7 +6,7 @@ import os
 from pinecone import Pinecone, ServerlessSpec
 from config import PINECONE_API_KEY
 
-INDEX_NAME = "draft-kb"
+INDEX_NAME = os.getenv("PINECONE_INDEX_NAME", "draft-kb")
 
 _pc = None
 _index = None
