@@ -34,7 +34,7 @@ export default async function Home() {
                       App →
                     </Button>
                   </Link>
-                  <UserButton afterSignOutUrl="/" />
+                  <UserButton />
                 </>
               ) : (
                 <SignInButton mode="modal">

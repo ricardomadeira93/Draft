@@ -15,6 +15,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 import { ThemeProvider } from "@/components/theme-provider";
+import { ClerkProvider } from "@clerk/nextjs";
 
 export const metadata: Metadata = {
   title: "Draft | Response Engine",

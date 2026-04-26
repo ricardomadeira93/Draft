@@ -73,7 +73,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               hidePersonal={false}
             />
             <div className="h-4 w-px bg-border mx-2" />
-            <UserButton afterSignOutUrl="/" />
+            <UserButton />
           </div>
         </header>
         <main className="flex-1 overflow-y-auto">

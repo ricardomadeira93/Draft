@@ -56,7 +56,7 @@ export default function ReviewPage() {
     fetchReview();
   }, [token]);
 
-  const handleUpdate = async (index: int, newStatus: "approved" | "flagged", comment: string = "") => {
+  const handleUpdate = async (index: number, newStatus: "approved" | "flagged", comment: string = "") => {
     setUpdating(index);
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
