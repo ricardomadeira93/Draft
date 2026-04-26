@@ -1,0 +1,63 @@
+{
+  "Navigation": {
+    "dashboard": "Painel",
+    "documents": "Documentos",
+    "team": "Equipe",
+    "history": "Histórico",
+    "settings": "Configurações"
+  },
+  "Landing": {
+    "title": "Automatize RFPs com IA",
+    "subtitle": "Pare de responder às mesmas perguntas de segurança. Envie sua base de conhecimento e deixe nossa IA cuidar do resto.",
+    "cta_start": "Começar Grátis",
+    "cta_login": "Entrar"
+  },
+  "Dashboard": {
+    "welcome": "Bem-vindo de volta",
+    "upload_knowledge": "Enviar Conhecimento",
+    "upload_rfp": "Enviar RFP",
+    "recent_activity": "Atividade Recente"
+  },
+  "Setup": {
+    "title": "Biblioteca de Conhecimento",
+    "subtitle": "Faça o upload dos documentos de segurança, RFPs anteriores e políticas da sua empresa. A IA os indexará de forma segura para a sua organização, gerando respostas altamente precisas.",
+    "upload_doc": "Enviar Documento",
+    "supported_formats": "PDF, DOCX, TXT até 10MB",
+    "indexed_documents": "Documentos Indexados",
+    "no_documents": "Nenhum documento enviado ainda.",
+    "delete": "Excluir",
+    "deleting": "Excluindo...",
+    "loading": "Carregando...",
+    "error_upload": "Falha ao enviar o arquivo. Tente novamente."
+  },
+  "Respond": {
+    "title": "Preenchimento Automático de RFP",
+    "subtitle": "Envie um CSV com uma coluna \"Question\" (Pergunta). A IA pesquisará sua Biblioteca de Conhecimento e gerará uma resposta precisa com referências para cada linha.",
+    "upload_questionnaire": "Enviar Questionário",
+    "download_template": "Baixar Modelo (CSV)",
+    "questions_detected": "{count} perguntas detectadas",
+    "must_have_question": "O CSV deve ter uma coluna \"Question\"",
+    "generate_answers": "Gerar Respostas",
+    "processing": "Processando",
+    "writing_answer": "Escrevendo resposta {current} de {total}...",
+    "elapsed": "{time} decorrido",
+    "estimated_total": "Tempo total estimado",
+    "time_remaining": "Tempo restante",
+    "results": "Resultados — {count} respostas",
+    "share_review": "Compartilhar para Revisão",
+    "link_copied": "Link Copiado!",
+    "no_questions": "Nenhuma pergunta encontrada. Verifique se o seu CSV possui a coluna \"Question\".",
+    "table_question": "Pergunta",
+    "table_answer": "Resposta",
+    "table_references": "Referências"
+  },
+  "History": {
+    "title": "Histórico de Gerações",
+    "subtitle": "Visualize e baixe questionários anteriores e respostas geradas para sua organização.",
+    "no_history": "Nenhum histórico encontrado."
+  },
+  "Team": {
+    "title": "Gerenciamento de Equipe",
+    "subtitle": "Gerencie os membros, convites e funções da sua organização."
+  }
+}

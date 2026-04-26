@@ -1,0 +1,63 @@
+{
+  "Navigation": {
+    "dashboard": "Dashboard",
+    "documents": "Documents",
+    "team": "Team",
+    "history": "History",
+    "settings": "Settings"
+  },
+  "Landing": {
+    "title": "Automate RFPs with AI",
+    "subtitle": "Stop answering the same security questions. Upload your knowledge base and let our AI handle the rest.",
+    "cta_start": "Start for Free",
+    "cta_login": "Sign In"
+  },
+  "Dashboard": {
+    "welcome": "Welcome back",
+    "upload_knowledge": "Upload Knowledge",
+    "upload_rfp": "Upload RFP",
+    "recent_activity": "Recent Activity"
+  },
+  "Setup": {
+    "title": "Knowledge Library",
+    "subtitle": "Upload your company's security documents, previous RFPs, and policies. The AI will securely index them for your organization to generate highly accurate answers.",
+    "upload_doc": "Upload Document",
+    "supported_formats": "PDF, DOCX, TXT up to 10MB",
+    "indexed_documents": "Indexed Documents",
+    "no_documents": "No documents uploaded yet.",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "loading": "Loading...",
+    "error_upload": "Failed to upload file. Please try again."
+  },
+  "Respond": {
+    "title": "RFP Auto-Filler",
+    "subtitle": "Upload a CSV with a \"Question\" column. The AI will search your Knowledge Library and generate an accurate response with references for every row.",
+    "upload_questionnaire": "Upload Questionnaire",
+    "download_template": "Download Template (CSV)",
+    "questions_detected": "{count} questions detected",
+    "must_have_question": "CSV must have a \"Question\" column",
+    "generate_answers": "Generate Answers",
+    "processing": "Processing",
+    "writing_answer": "Writing answer {current} of {total}...",
+    "elapsed": "{time} elapsed",
+    "estimated_total": "Estimated total",
+    "time_remaining": "Time remaining",
+    "results": "Results — {count} answers",
+    "share_review": "Share for Review",
+    "link_copied": "Link Copied!",
+    "no_questions": "No questions found. Check that your CSV has a \"Question\" column.",
+    "table_question": "Question",
+    "table_answer": "Answer",
+    "table_references": "References"
+  },
+  "History": {
+    "title": "Generation History",
+    "subtitle": "View and download past questionnaires and generated responses for your organization.",
+    "no_history": "No history found."
+  },
+  "Team": {
+    "title": "Team Management",
+    "subtitle": "Manage your organization's members, invitations, and roles."
+  }
+}

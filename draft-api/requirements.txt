@@ -11,6 +11,7 @@ charset-normalizer==3.4.7
 click==8.3.3
 clerk-backend-api
 cryptography
+psycopg2-binary
 PyJWT
 dataclasses-json==0.6.7
 distro==1.9.0

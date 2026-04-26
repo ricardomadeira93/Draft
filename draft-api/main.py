@@ -21,7 +21,8 @@ from llm_router import get_embedding_model
 from rag_engine import answer_question_with_sources, _get_retriever, extract_sources
 from tracker import (
     init_db, record_upload, list_uploads, delete_upload,
-    create_share_session, get_share_session, update_share_answer
+    create_share_session, get_share_session, update_share_answer,
+    save_document_history, list_document_history, get_document_history_answers
 )
 from auth import get_current_org
 from fastapi import Depends
@@ -124,7 +125,25 @@ async def process_csv(file: UploadFile = File(...), language: str = Form("Englis
             "Sources": result["sources"],
         })
 
-    return {"results": results}
+    import uuid
+    session_id = str(uuid.uuid4())
+    if results:
+        save_document_history(session_id, user["org_id"], file.filename, len(results), results)
+
+    return {"results": results, "session_id": session_id}
+
+@app.get("/history")
+def get_history(user: dict = Depends(get_current_org)):
+    """List all past processed documents for an organization."""
+    return {"history": list_document_history(user["org_id"])}
+
+@app.get("/history/{session_id}")
+def get_history_detail(session_id: str, user: dict = Depends(get_current_org)):
+    """Fetch the full answers for a past processed document."""
+    answers = get_document_history_answers(user["org_id"], session_id)
+    if not answers:
+        raise HTTPException(status_code=404, detail="History not found.")
+    return {"answers": answers}
 
 
 # ─── Export Processing ────────────────────────────────────────────────────────

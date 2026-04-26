@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Upload, CheckCircle2, Trash2, FileText, Loader2 } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
+import { useTranslations } from "next-intl";
 
 interface KBFile {
   filename: string;
@@ -22,6 +23,7 @@ export default function KnowledgeBase() {
   const [deletingFile, setDeletingFile] = useState<string | null>(null);
 
   const { getToken, orgId } = useAuth();
+  const t = useTranslations("Setup");
 
   const fetchFiles = useCallback(async () => {
     try {
@@ -131,13 +133,13 @@ export default function KnowledgeBase() {
         {/* Header */}
         <div>
           <p className="font-mono text-[11px] tracking-[0.2em] uppercase text-primary mb-3">
-            Knowledge Library
+            {t("title")}
           </p>
           <h1 className="text-3xl font-light tracking-tight text-foreground">
             Document Index
           </h1>
           <p className="text-muted-foreground mt-2 text-sm font-light max-w-xl">
-            Upload company policies, security docs, and past RFPs. The AI will securely index them to generate accurate answers.
+            {t("subtitle")}
           </p>
         </div>
 
@@ -145,7 +147,7 @@ export default function KnowledgeBase() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">
-              Upload Document
+              {t("upload_doc")}
             </p>
             <Button 
               variant="ghost" 
@@ -165,7 +167,7 @@ export default function KnowledgeBase() {
               className="max-w-xs mx-auto bg-transparent border-0 text-sm font-mono text-muted-foreground"
               onChange={(e) => { setSuccessMsg(""); setFile(e.target.files?.[0] || null); }}
             />
-            <p className="text-[11px] font-mono text-muted-foreground">Accepts .txt, .md files</p>
+            <p className="text-[11px] font-mono text-muted-foreground">{t("supported_formats")}</p>
           </div>
 
           {successMsg && (
@@ -187,17 +189,17 @@ export default function KnowledgeBase() {
         {/* File Table */}
         <div className="space-y-4">
           <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">
-            Indexed Documents
+            {t("indexed_documents")}
           </p>
 
           {loadingFiles ? (
             <div className="flex items-center gap-3 text-muted-foreground py-8">
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              <span className="text-xs font-mono">Loading index...</span>
+              <span className="text-xs font-mono">{t("loading")}</span>
             </div>
           ) : kbFiles.length === 0 ? (
             <div className="bg-card p-12 text-center text-muted-foreground text-xs font-mono">
-              No documents indexed yet.
+              {t("no_documents")}
             </div>
           ) : (
             <div className="bg-card">
