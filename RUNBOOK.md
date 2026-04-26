@@ -1,6 +1,6 @@
-# RFPilot Runbook
+# Draft Runbook
 
-This guide covers everything you need to get the RFPilot application running on your machine, bypassing Python environment headaches by using `uv`.
+This guide covers everything you need to get the Draft application running on your machine, bypassing Python environment headaches by using `uv`.
 
 ---
 
@@ -24,7 +24,7 @@ ollama pull nomic-embed-text
 ### 3. Setup the Backend API
 Navigate to the API folder, copy the environment file, and install dependencies using `uv`:
 ```bash
-cd rfpilot-api
+cd draft-api
 cp .env.example .env
 
 # Open the .env file and add your PINECONE_API_KEY
@@ -36,7 +36,7 @@ uv pip install httpx httpcore ollama --upgrade
 ### 4. Setup the Frontend Web App
 Navigate to the web folder and install Node packages:
 ```bash
-cd ../rfpilot-web
+cd ../draft-web
 npm install
 ```
 
@@ -48,7 +48,7 @@ Every time you sit down to work on the project, you need to start both the backe
 
 **Terminal 1: Start the Backend**
 ```bash
-cd rfpilot-api
+cd draft-api
 
 # uv run automatically handles activating the virtual environment for you!
 uv run uvicorn main:app --reload
@@ -57,7 +57,7 @@ uv run uvicorn main:app --reload
 
 **Terminal 2: Start the Frontend**
 ```bash
-cd rfpilot-web
+cd draft-web
 npm run dev
 ```
 

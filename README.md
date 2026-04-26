@@ -39,21 +39,21 @@ The application is built on FastAPI, Next.js, Pinecone, and LangChain. It ingest
 
 ### Backend
 ```bash
-cd rfpilot-api
+cd draft-api
 uv pip install -r requirements.txt
 uv run uvicorn main:app --reload
 ```
 
 ### Frontend
 ```bash
-cd rfpilot-web
+cd draft-web
 npm install
 npm run dev
 ```
 
 ### Environment Variables
-- **Backend** (`rfpilot-api/.env`): `PINECONE_API_KEY`, `GROQ_API_KEY`
-- **Frontend** (`rfpilot-web/.env.local`): `NEXT_PUBLIC_API_URL`
+- **Backend** (`draft-api/.env`): `PINECONE_API_KEY`, `GROQ_API_KEY`
+- **Frontend** (`draft-web/.env.local`): `NEXT_PUBLIC_API_URL`
 
 ## Deployment
 - **Frontend**: Vercel. Set `NEXT_PUBLIC_API_URL` to the backend URL.
