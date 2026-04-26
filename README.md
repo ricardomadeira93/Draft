@@ -40,7 +40,7 @@ The application is built on FastAPI, Next.js, Pinecone, and LangChain. It ingest
 ### Backend
 ```bash
 cd draft-api
-uv pip install -r requirements.txt
+uv pip install -r requirements.txt # (or pip install -r requirements.txt)
 uv run uvicorn main:app --reload
 ```
 
