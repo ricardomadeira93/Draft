@@ -19,7 +19,10 @@ from langchain_pinecone import PineconeVectorStore
 from database import index, INDEX_NAME
 from llm_router import get_embedding_model
 from rag_engine import answer_question_with_sources, _get_retriever, extract_sources
-from tracker import init_db, record_upload, list_uploads, delete_upload
+from tracker import (
+    init_db, record_upload, list_uploads, delete_upload,
+    create_share_session, get_share_session, update_share_answer
+)
 
 app = FastAPI(title="Draft API", description="RAG-powered RFP automation backend")
 
@@ -191,6 +194,65 @@ async def export_results(body: ExportRequest):
             
     else:
         raise HTTPException(status_code=400, detail="Invalid format. Use 'pdf' or 'docx'.")
+
+
+# ─── Share / Review Sessions ──────────────────────────────────────────────────
+
+import uuid
+from datetime import datetime, timedelta, timezone
+
+class ShareRequest(BaseModel):
+    results: List[QARowModel]
+
+@app.post("/share")
+async def create_share(body: ShareRequest):
+    """Create a shareable link for review, valid for 7 days."""
+    if not body.results:
+        raise HTTPException(status_code=400, detail="No results provided to share.")
+        
+    session_id = str(uuid.uuid4())
+    token = str(uuid.uuid4()) # For public link
+    expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+    
+    # Store in DB
+    create_share_session(session_id, token, [r.model_dump() for r in body.results], expires_at)
+    
+    # Normally we'd use an env var like SHARE_BASE_URL, but for now we return just the token.
+    # The frontend will construct the full URL.
+    return {
+        "status": "success",
+        "token": token,
+        "expires_at": expires_at.isoformat()
+    }
+
+@app.get("/review/{token}")
+def get_review(token: str):
+    """Fetch a shared session for public review."""
+    session = get_share_session(token)
+    if not session:
+        raise HTTPException(status_code=404, detail="Review session not found or expired.")
+    
+    # Only return the data needed for the review UI
+    return {
+        "status": session["status"],
+        "answers": session["answers"]
+    }
+
+class ReviewUpdateRequest(BaseModel):
+    status: str # 'approved' or 'flagged'
+    comment: str = ""
+
+@app.patch("/review/{token}/answer/{index}")
+def update_review(token: str, index: int, body: ReviewUpdateRequest):
+    """Update the status of a specific answer in a review session."""
+    if body.status not in ["approved", "flagged"]:
+        raise HTTPException(status_code=400, detail="Status must be 'approved' or 'flagged'.")
+        
+    success = update_share_answer(token, index, body.status, body.comment)
+    if not success:
+        raise HTTPException(status_code=404, detail="Review session or answer not found.")
+        
+    return {"status": "success"}
 
 
 # ─── Evaluation Dashboard ─────────────────────────────────────────────────────

@@ -50,6 +50,29 @@ async function handleExportDoc(results: QARow[], format: "pdf" | "docx", origina
   }
 }
 
+async function handleShare(results: QARow[], setSharing: (state: boolean) => void, setShared: (state: boolean) => void) {
+  setSharing(true);
+  try {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+    const res = await fetch(`${API_URL}/share`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ results })
+    });
+    if (!res.ok) throw new Error("Failed to generate share link");
+    
+    const data = await res.json();
+    const shareUrl = `${window.location.origin}/review/${data.token}`;
+    await navigator.clipboard.writeText(shareUrl);
+    setShared(true);
+    setTimeout(() => setShared(false), 3000);
+  } catch (e) {
+    alert("Share failed. Please check server logs.");
+  } finally {
+    setSharing(false);
+  }
+}
+
 function countCsvRows(file: File): Promise<number> {
   return new Promise(resolve => {
     const reader = new FileReader();
@@ -141,6 +164,8 @@ export default function Workspace() {
   const [rowCount, setRowCount] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [sharing, setSharing] = useState(false);
+  const [shared, setShared] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [language, setLanguage] = useState("English");
   const [results, setResults] = useState<QARow[] | null>(null);
@@ -278,6 +303,17 @@ export default function Workspace() {
               </div>
               
               <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="font-mono text-xs tracking-widest uppercase rounded-none gap-2 h-8 border-border"
+                  onClick={() => handleShare(results, setSharing, setShared)}
+                  disabled={sharing || shared}
+                >
+                  {sharing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+                  {shared ? "Link Copied!" : "Share for Review"}
+                </Button>
+                <div className="h-4 w-px bg-border mx-2" />
                 <Button
                   variant="ghost"
                   size="sm"
