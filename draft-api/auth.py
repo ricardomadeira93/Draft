@@ -34,4 +34,5 @@ def get_current_org(credentials: HTTPAuthorizationCredentials = Depends(security
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token has expired")
     except Exception as e:
-        raise HTTPException(status_code=401, detail="Invalid authentication token")
+        print(f"JWT Verification Error: {str(e)}")
+        raise HTTPException(status_code=401, detail=f"Invalid authentication token: {str(e)}")
