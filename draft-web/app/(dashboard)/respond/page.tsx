@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { FileText, Download, Loader2, FileCheck } from "lucide-react";
+import { useAuth } from "@clerk/nextjs";
 
 interface Source { source: string; snippet: string; }
 interface QARow { Question: string; Answer: string; Sources: Source[]; }
@@ -25,13 +26,17 @@ function downloadCSV(rows: QARow[], filename: string) {
   URL.revokeObjectURL(url); document.body.removeChild(a);
 }
 
-async function handleExportDoc(results: QARow[], format: "pdf" | "docx", originalFilename: string, setExporting: (state: boolean) => void) {
+async function handleExportDoc(results: QARow[], format: "pdf" | "docx", originalFilename: string, setExporting: (state: boolean) => void, getToken: () => Promise<string | null>) {
   setExporting(true);
   try {
+    const token = await getToken();
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
     const res = await fetch(`${API_URL}/export`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
       body: JSON.stringify({ results, format })
     });
     if (!res.ok) throw new Error("Failed to export document");
@@ -50,13 +55,17 @@ async function handleExportDoc(results: QARow[], format: "pdf" | "docx", origina
   }
 }
 
-async function handleShare(results: QARow[], setSharing: (state: boolean) => void, setShared: (state: boolean) => void) {
+async function handleShare(results: QARow[], setSharing: (state: boolean) => void, setShared: (state: boolean) => void, getToken: () => Promise<string | null>) {
   setSharing(true);
   try {
+    const token = await getToken();
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
     const res = await fetch(`${API_URL}/share`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
       body: JSON.stringify({ results })
     });
     if (!res.ok) throw new Error("Failed to generate share link");
@@ -170,6 +179,7 @@ export default function Workspace() {
   const [language, setLanguage] = useState("English");
   const [results, setResults] = useState<QARow[] | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { getToken } = useAuth();
 
   // Parse row count whenever file changes
   useEffect(() => {
@@ -196,8 +206,15 @@ export default function Workspace() {
     formData.append("file", file);
     formData.append("language", language);
     try {
+      const token = await getToken();
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
-      const res = await fetch(`${API_URL}/process-csv`, { method: "POST", body: formData });
+      const res = await fetch(`${API_URL}/process-csv`, { 
+        method: "POST", 
+        body: formData,
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
       if (!res.ok) throw new Error("Backend error.");
       const data = await res.json();
       setResults(data.results ?? []);
@@ -307,7 +324,7 @@ export default function Workspace() {
                   variant="outline"
                   size="sm"
                   className="font-mono text-xs tracking-widest uppercase rounded-none gap-2 h-8 border-border"
-                  onClick={() => handleShare(results, setSharing, setShared)}
+                  onClick={() => handleShare(results, setSharing, setShared, getToken)}
                   disabled={sharing || shared}
                 >
                   {sharing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
@@ -318,7 +335,7 @@ export default function Workspace() {
                   variant="ghost"
                   size="sm"
                   className="font-mono text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground rounded-none gap-2 hover:bg-transparent"
-                  onClick={() => handleExportDoc(results, "pdf", file?.name ?? "rfp.csv", setExporting)}
+                  onClick={() => handleExportDoc(results, "pdf", file?.name ?? "rfp.csv", setExporting, getToken)}
                   disabled={exporting}
                 >
                   {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
@@ -328,7 +345,7 @@ export default function Workspace() {
                   variant="ghost"
                   size="sm"
                   className="font-mono text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground rounded-none gap-2 hover:bg-transparent"
-                  onClick={() => handleExportDoc(results, "docx", file?.name ?? "rfp.csv", setExporting)}
+                  onClick={() => handleExportDoc(results, "docx", file?.name ?? "rfp.csv", setExporting, getToken)}
                   disabled={exporting}
                 >
                   {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}

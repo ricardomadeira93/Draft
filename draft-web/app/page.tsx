@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Compass, Database, FileText, Search, ArrowRight, Zap, Shield, BarChart3 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { SignedIn, SignedOut, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 
 export default function Home() {
   return (
@@ -23,11 +24,21 @@ export default function Home() {
             </Link>
             <div className="flex items-center gap-4 border-l border-border pl-4">
               <ThemeToggle />
-              <Link href="/respond">
-                <Button size="sm" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-6 h-9">
-                  App →
-                </Button>
-              </Link>
+              <SignedIn>
+                <Link href="/setup">
+                  <Button size="sm" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-6 h-9">
+                    App →
+                  </Button>
+                </Link>
+                <UserButton afterSignOutUrl="/" />
+              </SignedIn>
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <Button variant="ghost" size="sm" className="font-mono text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground rounded-none">
+                    Log In
+                  </Button>
+                </SignInButton>
+              </SignedOut>
             </div>
           </div>
         </div>
@@ -50,11 +61,20 @@ export default function Home() {
         </p>
 
         <div className="mt-12 flex flex-col sm:flex-row gap-4">
-          <Link href="/setup">
-            <Button size="lg" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-8 h-12">
-              Try the Live Demo
-            </Button>
-          </Link>
+          <SignedIn>
+            <Link href="/setup">
+              <Button size="lg" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-8 h-12">
+                Open Workspace
+              </Button>
+            </Link>
+          </SignedIn>
+          <SignedOut>
+            <SignUpButton mode="modal">
+              <Button size="lg" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-8 h-12">
+                Start for Free
+              </Button>
+            </SignUpButton>
+          </SignedOut>
           <Link href="/inspect">
             <Button size="lg" variant="ghost" className="rounded-none font-mono text-xs tracking-widest uppercase px-8 h-12 text-muted-foreground hover:text-foreground">
               Inspect the AI
@@ -240,11 +260,20 @@ export default function Home() {
             </h2>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 shrink-0">
-            <Link href="/setup">
-              <Button size="lg" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-8 h-12">
-                Try the Live Demo
-              </Button>
-            </Link>
+            <SignedIn>
+              <Link href="/setup">
+                <Button size="lg" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-8 h-12">
+                  Open Workspace
+                </Button>
+              </Link>
+            </SignedIn>
+            <SignedOut>
+              <SignUpButton mode="modal">
+                <Button size="lg" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-8 h-12">
+                  Get Started Now
+                </Button>
+              </SignUpButton>
+            </SignedOut>
             <Link href="/inspect">
               <Button size="lg" variant="ghost" className="rounded-none font-mono text-xs tracking-widest uppercase px-8 h-12 text-muted-foreground hover:text-foreground">
                 Inspect the AI

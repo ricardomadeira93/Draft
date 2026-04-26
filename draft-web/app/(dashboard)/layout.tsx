@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Compass, Database, Search, FileText } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { UserButton, OrganizationSwitcher } from "@clerk/nextjs";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -57,9 +58,28 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </aside>
 
       {/* Main */}
-      <main className="flex-1 overflow-y-auto">
-        {children}
-      </main>
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="h-14 shrink-0 border-b border-border bg-background flex items-center justify-between px-8">
+          <div></div>
+          <div className="flex items-center gap-4">
+            <OrganizationSwitcher 
+              appearance={{
+                elements: {
+                  organizationSwitcherTrigger: "font-mono text-xs uppercase tracking-widest text-foreground",
+                  organizationPreviewTextContainer: "font-mono text-xs uppercase tracking-widest",
+                  organizationPreviewSecondaryIdentifier: "hidden"
+                }
+              }}
+              hidePersonal={false}
+            />
+            <div className="h-4 w-px bg-border mx-2" />
+            <UserButton afterSignOutUrl="/" />
+          </div>
+        </header>
+        <main className="flex-1 overflow-y-auto">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

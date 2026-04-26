@@ -24,16 +24,41 @@ def init_db() -> None:
     """Create the uploads table if it doesn't exist. Called at app startup."""
     with _get_conn() as conn:
         conn.execute("""
+            CREATE TABLE IF NOT EXISTS organizations (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id TEXT PRIMARY KEY,
+                email TEXT UNIQUE NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS memberships (
+                user_id TEXT NOT NULL,
+                org_id TEXT NOT NULL,
+                role TEXT DEFAULT 'member',
+                PRIMARY KEY (user_id, org_id)
+            )
+        """)
+        conn.execute("""
             CREATE TABLE IF NOT EXISTS uploads (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                filename TEXT NOT NULL UNIQUE,
+                org_id TEXT NOT NULL,
+                filename TEXT NOT NULL,
                 chunk_count INTEGER NOT NULL,
-                uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(org_id, filename)
             )
         """)
         conn.execute("""
             CREATE TABLE IF NOT EXISTS share_sessions (
                 id TEXT PRIMARY KEY,
+                org_id TEXT NOT NULL,
                 token TEXT UNIQUE NOT NULL,
                 answers JSON NOT NULL,
                 status TEXT DEFAULT 'pending',
@@ -44,48 +69,49 @@ def init_db() -> None:
         conn.commit()
 
 
-def record_upload(filename: str, chunk_count: int) -> None:
+def record_upload(org_id: str, filename: str, chunk_count: int) -> None:
     """Insert or replace a file record after a successful upload."""
     with _get_conn() as conn:
         conn.execute(
-            "INSERT OR REPLACE INTO uploads (filename, chunk_count) VALUES (?, ?)",
-            (filename, chunk_count),
+            "INSERT OR REPLACE INTO uploads (org_id, filename, chunk_count) VALUES (?, ?, ?)",
+            (org_id, filename, chunk_count),
         )
         conn.commit()
 
 
-def list_uploads() -> list[dict]:
-    """Return all tracked uploads ordered by most recent."""
+def list_uploads(org_id: str) -> list[dict]:
+    """Return all tracked uploads ordered by most recent for a specific org."""
     with _get_conn() as conn:
         rows = conn.execute(
-            "SELECT filename, chunk_count, uploaded_at FROM uploads ORDER BY uploaded_at DESC"
+            "SELECT filename, chunk_count, uploaded_at FROM uploads WHERE org_id = ? ORDER BY uploaded_at DESC",
+            (org_id,)
         ).fetchall()
     return [dict(r) for r in rows]
 
 
-def delete_upload(filename: str) -> bool:
+def delete_upload(org_id: str, filename: str) -> bool:
     """
-    Remove a file from the tracker manifest.
+    Remove a file from the tracker manifest for a specific org.
     Returns True if a row was deleted, False if the filename wasn't found.
     """
     with _get_conn() as conn:
         cursor = conn.execute(
-            "DELETE FROM uploads WHERE filename = ?", (filename,)
+            "DELETE FROM uploads WHERE org_id = ? AND filename = ?", (org_id, filename)
         )
         conn.commit()
     return cursor.rowcount > 0
 
 # ─── Share Sessions ───────────────────────────────────────────────────────────
 
-def create_share_session(session_id: str, token: str, answers: list, expires_at: datetime) -> None:
+def create_share_session(session_id: str, org_id: str, token: str, answers: list, expires_at: datetime) -> None:
     """Insert a new share session into the database."""
     with _get_conn() as conn:
         conn.execute(
             """
-            INSERT INTO share_sessions (id, token, answers, expires_at)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO share_sessions (id, org_id, token, answers, expires_at)
+            VALUES (?, ?, ?, ?, ?)
             """,
-            (session_id, token, json.dumps(answers), expires_at.isoformat())
+            (session_id, org_id, token, json.dumps(answers), expires_at.isoformat())
         )
         conn.commit()
 

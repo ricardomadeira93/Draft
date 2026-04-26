@@ -21,11 +21,17 @@ def _get_vectorstore():
     return _vectorstore
 
 
-def _get_retriever():
-    global _retriever
-    if _retriever is None:
-        _retriever = _get_vectorstore().as_retriever(search_kwargs={"k": 3})
-    return _retriever
+def _get_retriever(namespace: str):
+    """
+    Initialize the Pinecone vector store with the organization's namespace.
+    """
+    embeddings = get_embedding_model()
+    vectorstore = PineconeVectorStore(
+        index_name=INDEX_NAME, 
+        embedding=embeddings,
+        namespace=namespace
+    )
+    return vectorstore.as_retriever(search_kwargs={"k": 3})
 
 template = """You are a professional B2B RFP (Request for Proposal) assistant.
 Use the following pieces of retrieved context to answer the question.
@@ -65,7 +71,7 @@ def extract_sources(docs: list) -> list[dict]:
 def _build_rag_chain():
     """Build the LCEL chain on demand using the lazy retriever."""
     return (
-        {"context": _get_retriever() | format_docs, "question": RunnablePassthrough()}
+        {"context": _get_retriever("") | format_docs, "question": RunnablePassthrough()}
         | prompt
         | get_llm()
         | StrOutputParser()
@@ -77,12 +83,12 @@ async def answer_question(question: str) -> str:
     return await _build_rag_chain().ainvoke(question)
 
 
-async def answer_question_with_sources(question: str, language: str = "English") -> dict:
+async def answer_question_with_sources(question: str, language: str, namespace: str) -> dict:
     """
-    Returns the AI answer plus the source chunks used to generate it.
-    Used by the workspace data table and the evaluation dashboard.
+    Run the full RAG pipeline for a specific tenant namespace.
     """
-    docs = await _get_retriever().ainvoke(question)
+    retriever = _get_retriever(namespace)
+    docs = await retriever.ainvoke(question)
     context = format_docs(docs)
     sources = extract_sources(docs)
 

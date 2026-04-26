@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Upload, CheckCircle2, Trash2, FileText, Loader2 } from "lucide-react";
+import { useAuth } from "@clerk/nextjs";
 
 interface KBFile {
   filename: string;
@@ -20,10 +21,17 @@ export default function KnowledgeBase() {
   const [loadingFiles, setLoadingFiles] = useState(true);
   const [deletingFile, setDeletingFile] = useState<string | null>(null);
 
+  const { getToken } = useAuth();
+
   const fetchFiles = useCallback(async () => {
     try {
+      const token = await getToken();
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
-      const res = await fetch(`${API_URL}/kb/files`);
+      const res = await fetch(`${API_URL}/kb/files`, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
       const data = await res.json();
       setKbFiles(data.files ?? []);
     } catch {
@@ -42,8 +50,15 @@ export default function KnowledgeBase() {
     const formData = new FormData();
     formData.append("file", file);
     try {
+      const token = await getToken();
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
-      const res = await fetch(`${API_URL}/upload-kb`, { method: "POST", body: formData });
+      const res = await fetch(`${API_URL}/upload-kb`, { 
+        method: "POST", 
+        body: formData,
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
       const data = await res.json();
       if (res.ok) { setSuccessMsg(data.message); setFile(null); await fetchFiles(); }
       else alert("Upload failed. Check server logs.");
@@ -65,8 +80,15 @@ export default function KnowledgeBase() {
       const formData = new FormData();
       formData.append("file", sampleFile);
       
+      const token = await getToken();
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
-      const uploadRes = await fetch(`${API_URL}/upload-kb`, { method: "POST", body: formData });
+      const uploadRes = await fetch(`${API_URL}/upload-kb`, { 
+        method: "POST", 
+        body: formData,
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
       const data = await uploadRes.json();
       if (uploadRes.ok) { setSuccessMsg(data.message); await fetchFiles(); }
       else alert("Sample upload failed. Check server logs.");
@@ -80,8 +102,14 @@ export default function KnowledgeBase() {
   const handleDelete = async (filename: string) => {
     setDeletingFile(filename);
     try {
+      const token = await getToken();
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
-      const res = await fetch(`${API_URL}/kb/files/${encodeURIComponent(filename)}`, { method: "DELETE" });
+      const res = await fetch(`${API_URL}/kb/files/${encodeURIComponent(filename)}`, { 
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
       if (res.ok) await fetchFiles();
       else { const data = await res.json(); alert(data.detail ?? "Delete failed."); }
     } catch {
