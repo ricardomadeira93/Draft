@@ -1,0 +1,51 @@
+Our company is called Draft.
+Our company was founded in 2019 and is headquartered in Austin, Texas.
+We are a B2B SaaS company specializing in AI-powered proposal automation for mid-market and enterprise clients.
+Our CEO is John Doe and our CTO is Sarah Chen.
+We currently serve over 450 enterprise clients across North America and Europe.
+Our average client size is 200-2000 employees.
+
+We offer 24/7 technical support via live chat, email and phone.
+Our average support response time is under 2 hours for critical issues.
+We provide a dedicated Customer Success Manager for all Enterprise plan customers.
+Our customer support team operates across US, UK and Portugal time zones.
+Our SLA guarantees 99.9% uptime for all paid plans.
+
+Our strict refund policy is 30 days, no questions asked.
+We offer three pricing tiers: Starter at $299/month, Professional at $799/month and Enterprise with custom pricing.
+All plans include a 14-day free trial with no credit card required.
+Annual billing offers a 20% discount compared to monthly billing.
+Enterprise contracts are negotiated annually with volume discounts available.
+
+We use AWS for all cloud infrastructure and host everything in the us-east-1 region.
+We also maintain a disaster recovery environment in us-west-2 with automatic failover.
+Our software is SOC2 Type II compliant, certified annually by a third-party auditor.
+We are GDPR compliant and offer a Data Processing Agreement for all EU customers.
+We are ISO 27001 certified as of 2023.
+All data is encrypted at rest using AES-256 and in transit using TLS 1.3.
+We do not sell or share customer data with third parties under any circumstances.
+Customer data is backed up every 6 hours with 30-day retention.
+We support SSO via SAML 2.0 and OAuth 2.0, compatible with Okta, Azure AD and Google Workspace.
+We offer role-based access control with granular permission settings.
+Our platform supports audit logs with 12-month retention for Enterprise customers.
+
+Our core product is an AI-powered RFP automation platform that uses RAG architecture to auto-fill responses based on a company knowledge base.
+The platform supports PDF, Word, Excel and web-form based RFPs.
+Our AI engine is built on a combination of OpenAI GPT-4 and proprietary fine-tuned models.
+We support over 15 languages for RFP response generation.
+Our platform integrates natively with Salesforce, HubSpot, Microsoft Teams, Slack and Google Drive.
+We offer a REST API and webhooks for custom integrations.
+Our API documentation is publicly available and follows OpenAPI 3.0 specification.
+Average RFP completion time is reduced by 80% compared to manual processes.
+Our platform has processed over 120,000 RFPs since launch.
+
+Our typical implementation timeline is 2-4 weeks for Professional plans and 4-8 weeks for Enterprise.
+We provide onboarding training sessions and a dedicated implementation engineer for Enterprise customers.
+Our knowledge base migration service can import existing proposal content from Word, PDF and Confluence.
+We offer custom model fine-tuning on client data for Enterprise plans.
+
+Our platform guarantees 99.9% uptime per our SLA.
+Planned maintenance windows are communicated at least 72 hours in advance.
+Our status page is publicly available at status.draft.com.
+We use a multi-tenant architecture with strict data isolation between clients.
+Our infrastructure auto-scales to handle peak usage with no performance degradation.

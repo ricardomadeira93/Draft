@@ -1,0 +1,25 @@
+# Environments
+.env
+.venv
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# SQLite Databases
+*.db
+*.sqlite3
+
+# OS generated files
+.DS_Store
+
+# PyBuilder
+.pybuilder/
+
+# macOS
+.DS_Store
