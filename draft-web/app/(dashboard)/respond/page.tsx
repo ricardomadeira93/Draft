@@ -56,11 +56,11 @@ function ProcessingState({ rowCount, elapsed }: { rowCount: number; elapsed: num
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Loader2 className="h-3.5 w-3.5 text-primary animate-spin shrink-0" />
-          <span className="font-mono text-xs text-foreground">
+          <span className="font-mono text-sm text-foreground">
             Writing answer {currentRow} of {rowCount}...
           </span>
         </div>
-        <span className="font-mono text-[11px] text-muted-foreground">
+        <span className="font-mono text-xs text-muted-foreground">
           {formatTime(elapsed)} elapsed
         </span>
       </div>
@@ -77,19 +77,19 @@ function ProcessingState({ rowCount, elapsed }: { rowCount: number; elapsed: num
       <div className="flex items-center justify-between">
         <div className="flex gap-6">
           <div>
-            <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground mb-1">Questions</p>
-            <p className="font-mono text-sm text-foreground">{rowCount}</p>
+            <p className="font-mono text-xs tracking-[0.15em] uppercase text-muted-foreground mb-1">Questions</p>
+            <p className="font-mono text-base text-foreground">{rowCount}</p>
           </div>
           <div>
-            <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground mb-1">Estimated total</p>
-            <p className="font-mono text-sm text-foreground">{formatTime(estimated)}</p>
+            <p className="font-mono text-xs tracking-[0.15em] uppercase text-muted-foreground mb-1">Estimated total</p>
+            <p className="font-mono text-base text-foreground">{formatTime(estimated)}</p>
           </div>
           <div>
-            <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground mb-1">Time remaining</p>
-            <p className="font-mono text-sm text-primary">{formatTime(remaining)}</p>
+            <p className="font-mono text-xs tracking-[0.15em] uppercase text-muted-foreground mb-1">Time remaining</p>
+            <p className="font-mono text-base text-primary">{formatTime(remaining)}</p>
           </div>
         </div>
-        <p className="font-mono text-[10px] text-muted-foreground">
+        <p className="font-mono text-xs text-muted-foreground">
           {Math.round(progress)}%
         </p>
       </div>
@@ -178,25 +178,25 @@ export default function Workspace() {
         {!loading && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">
+              <p className="font-mono text-xs tracking-[0.15em] uppercase text-muted-foreground">
                 Upload Questionnaire
               </p>
               <div className="flex items-center gap-4">
                 <a
                   href="/samples/sample_questionnaire.csv"
                   download
-                  className="font-mono text-[10px] tracking-widest uppercase text-primary hover:text-primary/80 transition-colors"
+                  className="font-mono text-xs tracking-widest uppercase text-primary hover:text-primary/80 transition-colors"
                 >
                   Download Template (CSV)
                 </a>
-                <select
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
-                  className="bg-transparent border border-border text-foreground font-mono text-[10px] tracking-widest uppercase py-1 px-2 focus:outline-none focus:border-primary transition-colors cursor-pointer"
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setLanguage(l => l === "English" ? "Portuguese (pt-PT)" : "English")}
+                  className="rounded-none font-mono text-xs tracking-widest uppercase h-8 px-3 border-border"
                 >
-                  <option value="English" className="bg-background">English</option>
-                  <option value="Portuguese (pt-PT)" className="bg-background">Portuguese (pt-PT)</option>
-                </select>
+                  {language === "English" ? "EN" : "PT"}
+                </Button>
               </div>
             </div>
             <div className="bg-card p-8 text-center space-y-4">
@@ -204,11 +204,11 @@ export default function Workspace() {
               <Input
                 type="file"
                 accept=".csv"
-                className="max-w-xs mx-auto bg-transparent border-0 text-sm font-mono text-muted-foreground"
+                className="max-w-xs mx-auto bg-transparent border-0 text-base font-mono text-muted-foreground"
                 onChange={e => { setResults(null); setFile(e.target.files?.[0] || null); }}
               />
               {rowCount > 0 && (
-                <p className="font-mono text-[11px] text-primary">
+                <p className="font-mono text-xs text-primary">
                   {rowCount} question{rowCount !== 1 ? "s" : ""} detected
                   <span className="text-muted-foreground ml-2">
                     — est. {formatTime(rowCount * SECS_PER_QUESTION)}
@@ -216,12 +216,12 @@ export default function Workspace() {
                 </p>
               )}
               {!rowCount && (
-                <p className="text-[11px] font-mono text-muted-foreground">CSV must have a &quot;Question&quot; column</p>
+                <p className="text-xs font-mono text-muted-foreground">CSV must have a &quot;Question&quot; column</p>
               )}
             </div>
 
             <Button
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase rounded-none h-10"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-sm tracking-widest uppercase rounded-none h-12"
               onClick={handleProcess}
               disabled={!file || loading}
             >
@@ -233,7 +233,7 @@ export default function Workspace() {
         {/* Processing state */}
         {loading && (
           <div className="space-y-3">
-            <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">
+            <p className="font-mono text-xs tracking-[0.15em] uppercase text-muted-foreground">
               Processing
             </p>
             <ProcessingState rowCount={rowCount} elapsed={elapsed} />
@@ -245,24 +245,24 @@ export default function Workspace() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <FileCheck className="h-4 w-4 text-primary" />
-                <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">
+                <FileCheck className="h-5 w-5 text-primary" />
+                <p className="font-mono text-xs tracking-[0.15em] uppercase text-muted-foreground">
                   Results — {results.length} {results.length === 1 ? "answer" : "answers"}
                 </p>
               </div>
               <Button
                 variant="ghost"
                 size="sm"
-                className="font-mono text-[10px] tracking-widest uppercase text-muted-foreground hover:text-foreground rounded-none gap-2 hover:bg-transparent"
+                className="font-mono text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground rounded-none gap-2 hover:bg-transparent"
                 onClick={() => downloadCSV(results, `answered_${file?.name ?? "rfp.csv"}`)}
               >
-                <Download className="h-3.5 w-3.5" />
+                <Download className="h-4 w-4" />
                 Export CSV
               </Button>
             </div>
 
             {results.length === 0 ? (
-              <div className="bg-card p-12 text-center text-muted-foreground text-xs font-mono">
+              <div className="bg-card p-12 text-center text-muted-foreground text-sm font-mono">
                 No questions found. Check that your CSV has a &quot;Question&quot; column.
               </div>
             ) : (
@@ -270,22 +270,22 @@ export default function Workspace() {
                 <Table>
                   <TableHeader>
                     <TableRow className="border-0 hover:bg-transparent">
-                      <TableHead className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground w-[28%]">Question</TableHead>
-                      <TableHead className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground w-[48%]">Answer</TableHead>
-                      <TableHead className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">References</TableHead>
+                      <TableHead className="font-mono text-xs tracking-[0.15em] uppercase text-muted-foreground w-[28%]">Question</TableHead>
+                      <TableHead className="font-mono text-xs tracking-[0.15em] uppercase text-muted-foreground w-[48%]">Answer</TableHead>
+                      <TableHead className="font-mono text-xs tracking-[0.15em] uppercase text-muted-foreground">References</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {results.map((row, i) => (
                       <TableRow key={i} className="border-0 hover:bg-accent/30 align-top">
-                        <TableCell className="font-mono text-xs text-foreground align-top py-4">{row.Question}</TableCell>
-                        <TableCell className="text-xs text-muted-foreground leading-relaxed align-top py-4 font-light">{row.Answer}</TableCell>
+                        <TableCell className="font-mono text-sm text-foreground align-top py-4">{row.Question}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground leading-relaxed align-top py-4 font-light">{row.Answer}</TableCell>
                         <TableCell className="align-top py-4">
                           <div className="flex flex-col gap-1">
                             {row.Sources.map((s, j) => (
                               <span
                                 key={j}
-                                className="inline-flex items-center text-[10px] font-mono text-primary bg-primary/5 px-2 py-0.5 w-fit"
+                                className="inline-flex items-center text-xs font-mono text-primary bg-primary/5 px-2 py-0.5 w-fit"
                               >
                                 {s.source}
                               </span>

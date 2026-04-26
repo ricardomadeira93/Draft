@@ -50,7 +50,7 @@ export default function Home() {
         </p>
 
         <div className="mt-12 flex flex-col sm:flex-row gap-4">
-          <Link href="/respond">
+          <Link href="/setup">
             <Button size="lg" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-8 h-12">
               Try the Live Demo
             </Button>
@@ -240,7 +240,7 @@ export default function Home() {
             </h2>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 shrink-0">
-            <Link href="/respond">
+            <Link href="/setup">
               <Button size="lg" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-8 h-12">
                 Try the Live Demo
               </Button>
