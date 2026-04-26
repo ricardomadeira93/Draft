@@ -116,6 +116,7 @@ export default function Workspace() {
   const [rowCount, setRowCount] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [elapsed, setElapsed] = useState(0);
+  const [language, setLanguage] = useState("English");
   const [results, setResults] = useState<QARow[] | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -142,6 +143,7 @@ export default function Workspace() {
     setResults(null);
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("language", language);
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
       const res = await fetch(`${API_URL}/process-csv`, { method: "POST", body: formData });
@@ -175,9 +177,28 @@ export default function Workspace() {
         {/* Upload — hidden while processing */}
         {!loading && (
           <div className="space-y-4">
-            <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">
-              Upload Questionnaire
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">
+                Upload Questionnaire
+              </p>
+              <div className="flex items-center gap-4">
+                <a
+                  href="/samples/sample_questionnaire.csv"
+                  download
+                  className="font-mono text-[10px] tracking-widest uppercase text-primary hover:text-primary/80 transition-colors"
+                >
+                  Download Template (CSV)
+                </a>
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  className="bg-transparent border border-border text-foreground font-mono text-[10px] tracking-widest uppercase py-1 px-2 focus:outline-none focus:border-primary transition-colors cursor-pointer"
+                >
+                  <option value="English" className="bg-background">English</option>
+                  <option value="Portuguese (pt-PT)" className="bg-background">Portuguese (pt-PT)</option>
+                </select>
+              </div>
+            </div>
             <div className="bg-card p-8 text-center space-y-4">
               <FileText className="h-6 w-6 text-muted-foreground mx-auto" />
               <Input

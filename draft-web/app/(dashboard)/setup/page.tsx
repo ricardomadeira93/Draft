@@ -54,6 +54,29 @@ export default function KnowledgeBase() {
     }
   };
 
+  const handleUploadSample = async () => {
+    setUploading(true);
+    setSuccessMsg("");
+    try {
+      const res = await fetch("/samples/sample_knowledge.md");
+      const blob = await res.blob();
+      const sampleFile = new File([blob], "sample_knowledge.md", { type: "text/markdown" });
+      
+      const formData = new FormData();
+      formData.append("file", sampleFile);
+      
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+      const uploadRes = await fetch(`${API_URL}/upload-kb`, { method: "POST", body: formData });
+      const data = await uploadRes.json();
+      if (uploadRes.ok) { setSuccessMsg(data.message); await fetchFiles(); }
+      else alert("Sample upload failed. Check server logs.");
+    } catch {
+      alert("Error uploading sample data. Is FastAPI running?");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleDelete = async (filename: string) => {
     setDeletingFile(filename);
     try {
@@ -87,9 +110,20 @@ export default function KnowledgeBase() {
 
         {/* Upload Zone */}
         <div className="space-y-4">
-          <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">
-            Upload Document
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">
+              Upload Document
+            </p>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="font-mono text-[10px] tracking-widest uppercase text-primary hover:text-primary/80 rounded-none h-auto py-0 px-0 hover:bg-transparent"
+              onClick={handleUploadSample}
+              disabled={uploading}
+            >
+              Or load sample policy
+            </Button>
+          </div>
           <div className="bg-card p-8 text-center space-y-4">
             <Upload className="h-6 w-6 text-muted-foreground mx-auto" />
             <Input

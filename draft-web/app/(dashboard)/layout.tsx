@@ -25,25 +25,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             Workspace
           </p>
           <Link
-            href="/workspace"
-            className="flex items-center gap-2.5 px-2 py-2 text-xs font-mono tracking-wide text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors"
-          >
-            <FileText className="h-3.5 w-3.5 shrink-0" />
-            Auto-Filler
-          </Link>
-          <Link
-            href="/knowledge"
+            href="/setup"
             className="flex items-center gap-2.5 px-2 py-2 text-xs font-mono tracking-wide text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors"
           >
             <Database className="h-3.5 w-3.5 shrink-0" />
-            Knowledge Library
+            1. Knowledge Library
           </Link>
           <Link
-            href="/evaluate"
+            href="/respond"
+            className="flex items-center gap-2.5 px-2 py-2 text-xs font-mono tracking-wide text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors"
+          >
+            <FileText className="h-3.5 w-3.5 shrink-0" />
+            2. Auto-Filler
+          </Link>
+          <Link
+            href="/inspect"
             className="flex items-center gap-2.5 px-2 py-2 text-xs font-mono tracking-wide text-muted-foreground hover:text-foreground hover:bg-accent rounded-sm transition-colors"
           >
             <Search className="h-3.5 w-3.5 shrink-0" />
-            Answer Inspector
+            3. Answer Inspector
           </Link>
         </nav>
 

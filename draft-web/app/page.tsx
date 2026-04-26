@@ -15,15 +15,15 @@ export default function Home() {
             <span className="font-mono text-sm font-medium tracking-widest uppercase text-foreground group-hover:text-primary transition-colors">Draft</span>
           </div>
           <div className="flex items-center gap-8">
-            <Link href="/evaluate" className="font-mono text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors hidden sm:block">
+            <Link href="/inspect" className="font-mono text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors hidden sm:block">
               Answer Inspector
             </Link>
-            <Link href="/knowledge" className="font-mono text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors hidden sm:block">
+            <Link href="/setup" className="font-mono text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground transition-colors hidden sm:block">
               Knowledge Library
             </Link>
             <div className="flex items-center gap-4 border-l border-border pl-4">
               <ThemeToggle />
-              <Link href="/workspace">
+              <Link href="/respond">
                 <Button size="sm" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-6 h-9">
                   App →
                 </Button>
@@ -50,12 +50,12 @@ export default function Home() {
         </p>
 
         <div className="mt-12 flex flex-col sm:flex-row gap-4">
-          <Link href="/workspace">
+          <Link href="/respond">
             <Button size="lg" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-8 h-12">
               Try the Live Demo
             </Button>
           </Link>
-          <Link href="/evaluate">
+          <Link href="/inspect">
             <Button size="lg" variant="ghost" className="rounded-none font-mono text-xs tracking-widest uppercase px-8 h-12 text-muted-foreground hover:text-foreground">
               Inspect the AI
             </Button>
@@ -173,7 +173,7 @@ export default function Home() {
                 icon: <Database className="h-5 w-5 text-primary shrink-0" />,
                 title: "Build your Knowledge Library",
                 body: "Upload policies, security docs, and past RFPs. The system safely stores them so the AI can read them later.",
-                href: "/knowledge",
+                href: "/setup",
                 cta: "Manage library",
               },
               {
@@ -181,7 +181,7 @@ export default function Home() {
                 icon: <FileText className="h-5 w-5 text-primary shrink-0" />,
                 title: "Upload the Questionnaire",
                 body: "Drop in a CSV of questions. Our Response Engine instantly finds the right context and writes a professional, accurate answer.",
-                href: "/workspace",
+                href: "/respond",
                 cta: "Try it now",
               },
               {
@@ -189,7 +189,7 @@ export default function Home() {
                 icon: <Search className="h-5 w-5 text-primary shrink-0" />,
                 title: "Review & Verify",
                 body: "Review every answer with its exact reference document before downloading. The Answer Inspector shows exactly how the AI thought.",
-                href: "/evaluate",
+                href: "/inspect",
                 cta: "Open inspector",
               },
             ].map((item) => (
@@ -240,12 +240,12 @@ export default function Home() {
             </h2>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 shrink-0">
-            <Link href="/workspace">
+            <Link href="/respond">
               <Button size="lg" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-8 h-12">
                 Try the Live Demo
               </Button>
             </Link>
-            <Link href="/evaluate">
+            <Link href="/inspect">
               <Button size="lg" variant="ghost" className="rounded-none font-mono text-xs tracking-widest uppercase px-8 h-12 text-muted-foreground hover:text-foreground">
                 Inspect the AI
               </Button>

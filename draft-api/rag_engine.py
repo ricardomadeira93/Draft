@@ -31,6 +31,7 @@ template = """You are a professional B2B RFP (Request for Proposal) assistant.
 Use the following pieces of retrieved context to answer the question.
 If the answer is not in the context, say "I do not have enough information to answer this based on the company knowledge base."
 Do not make up facts. Keep the answer concise and highly professional.
+Please respond in {language}.
 
 Context:
 {context}
@@ -76,7 +77,7 @@ async def answer_question(question: str) -> str:
     return await _build_rag_chain().ainvoke(question)
 
 
-async def answer_question_with_sources(question: str) -> dict:
+async def answer_question_with_sources(question: str, language: str = "English") -> dict:
     """
     Returns the AI answer plus the source chunks used to generate it.
     Used by the workspace data table and the evaluation dashboard.
@@ -85,7 +86,7 @@ async def answer_question_with_sources(question: str) -> dict:
     context = format_docs(docs)
     sources = extract_sources(docs)
 
-    filled_prompt = prompt.format(context=context, question=question)
+    filled_prompt = prompt.format(context=context, question=question, language=language)
     answer = await get_llm().ainvoke(filled_prompt)
     answer_text = answer.content if hasattr(answer, "content") else str(answer)
 

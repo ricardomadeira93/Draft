@@ -7,7 +7,7 @@ import certifi
 # Bypass macOS Python SSL certificate issues locally
 os.environ["SSL_CERT_FILE"] = certifi.where()
 ssl._create_default_https_context = ssl._create_unverified_context
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -96,7 +96,7 @@ def delete_kb_file(filename: str):
 # ─── RFP Processing ───────────────────────────────────────────────────────────
 
 @app.post("/process-csv")
-async def process_csv(file: UploadFile = File(...)):
+async def process_csv(file: UploadFile = File(...), language: str = Form("English")):
     """
     Process a CSV with a 'Question' column.
     Returns JSON with answers AND source attribution per row.
@@ -109,7 +109,7 @@ async def process_csv(file: UploadFile = File(...)):
         question = row.get("Question", "").strip()
         if not question:
             continue
-        result = await answer_question_with_sources(question)
+        result = await answer_question_with_sources(question, language)
         results.append({
             "Question": question,
             "Answer": result["answer"],
@@ -123,6 +123,7 @@ async def process_csv(file: UploadFile = File(...)):
 
 class EvaluateRequest(BaseModel):
     question: str
+    language: str = "English"
 
 
 @app.post("/evaluate")
@@ -137,7 +138,7 @@ async def evaluate(body: EvaluateRequest):
         raise HTTPException(status_code=422, detail="Question cannot be empty.")
 
     docs = await _get_retriever().ainvoke(question)
-    result = await answer_question_with_sources(question)
+    result = await answer_question_with_sources(question, body.language)
 
     chunks = [
         {
