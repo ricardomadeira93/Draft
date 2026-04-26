@@ -251,6 +251,7 @@ async def export_results(body: ExportRequest, user: dict = Depends(get_current_o
 # ─── Share / Review Sessions ──────────────────────────────────────────────────
 
 import uuid
+import secrets
 from datetime import datetime, timedelta, timezone
 
 class ShareRequest(BaseModel):
@@ -263,7 +264,7 @@ async def create_share(body: ShareRequest, user: dict = Depends(get_current_org)
         raise HTTPException(status_code=400, detail="No results provided to share.")
         
     session_id = str(uuid.uuid4())
-    token = str(uuid.uuid4()) # For public link
+    token = secrets.token_urlsafe(32) # For public link
     expires_at = datetime.now(timezone.utc) + timedelta(days=7)
     
     # Store in DB using org_id
