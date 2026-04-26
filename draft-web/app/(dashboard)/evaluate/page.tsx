@@ -1,12 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
-import { ArrowLeft, Search, Loader2, FileText, ChevronDown, ChevronRight } from "lucide-react";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { Loader2, FileText, ChevronDown, ChevronRight } from "lucide-react";
 
 interface Source { source: string; snippet: string; }
 interface Chunk { source: string; text: string; rank: number; }
@@ -20,17 +17,23 @@ interface EvalResult {
 function ChunkCard({ chunk }: { chunk: Chunk }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="border border-border">
-      <button onClick={() => setOpen(v => !v)} className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-accent/50 transition-colors">
+    <div className="bg-card">
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-accent/30 transition-colors"
+      >
         <div className="flex items-center gap-3">
-          <span className="text-xs font-bold text-primary border border-primary/40 px-2 py-0.5">#{chunk.rank}</span>
+          <span className="font-mono text-[10px] tracking-widest text-primary">#{chunk.rank}</span>
           <span className="font-mono text-xs text-muted-foreground">{chunk.source}</span>
         </div>
-        {open ? <ChevronDown className="h-4 w-4 text-muted-foreground" /> : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+        {open
+          ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+          : <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+        }
       </button>
       {open && (
-        <div className="px-4 pb-4 pt-1 border-t border-border">
-          <p className="text-sm text-muted-foreground font-mono leading-relaxed whitespace-pre-wrap">{chunk.text}</p>
+        <div className="px-4 pb-4 pt-1">
+          <p className="text-xs text-muted-foreground font-mono leading-relaxed whitespace-pre-wrap">{chunk.text}</p>
         </div>
       )}
     </div>
@@ -65,71 +68,84 @@ export default function EvaluatePage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <main className="max-w-5xl mx-auto px-6 py-12 space-y-10">
+      <main className="max-w-4xl mx-auto px-8 py-14 space-y-12">
+
+        {/* Header */}
         <div>
-          <p className="text-primary text-xs font-bold tracking-widest uppercase mb-2">ANSWER INSPECTOR</p>
-          <h1 className="text-4xl font-bold tracking-tight">Evaluate AI Logic</h1>
-          <p className="text-muted-foreground mt-2 max-w-2xl">
-            Ask a question and inspect the pipeline: see which references the AI retrieved, exactly where they came from, and how it used them to generate the answer.
+          <p className="font-mono text-[11px] tracking-[0.2em] uppercase text-primary mb-3">
+            Answer Inspector
+          </p>
+          <h1 className="text-3xl font-light tracking-tight text-foreground">
+            Evaluate AI Logic
+          </h1>
+          <p className="text-muted-foreground mt-2 text-sm font-light max-w-2xl">
+            Ask a question and inspect the pipeline. See which references were retrieved, where they came from, and how the AI used them.
           </p>
         </div>
 
-        <Card className="border-border">
-          <CardHeader><CardTitle className="text-base font-medium">Ask a Question</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
-            <textarea
-              className="w-full min-h-[100px] bg-transparent border border-border px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary resize-none transition-colors font-mono"
-              placeholder="e.g. Does the company have a SOC 2 Type II certification?"
-              value={question}
-              onChange={e => setQuestion(e.target.value)}
-              onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleEvaluate(); }}
-            />
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-muted-foreground">⌘ + Enter to run</p>
-              <Button className="rounded-[1rem] bg-primary hover:bg-primary/90 text-primary-foreground" onClick={handleEvaluate} disabled={!question.trim() || loading}>
-                {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Retrieving...</> : "Run Evaluation"}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Input */}
+        <div className="space-y-3">
+          <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">Question</p>
+          <textarea
+            className="w-full min-h-[100px] bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none resize-none font-mono border-0"
+            placeholder="e.g. Does the company have a SOC 2 Type II certification?"
+            value={question}
+            onChange={e => setQuestion(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) handleEvaluate(); }}
+          />
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] font-mono text-muted-foreground">⌘ + Enter to run</p>
+            <Button
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase rounded-none h-9 px-6"
+              onClick={handleEvaluate}
+              disabled={!question.trim() || loading}
+            >
+              {loading ? <><Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />Retrieving...</> : "Run"}
+            </Button>
+          </div>
+        </div>
 
         {result && (
-          <div className="space-y-8">
-            <div>
-              <h2 className="text-sm font-bold text-primary tracking-widest uppercase mb-3">GENERATED ANSWER</h2>
-              <div className="border border-primary/30 bg-primary/5 p-6">
-                <p className="text-foreground leading-relaxed">{result.answer}</p>
+          <div className="space-y-10">
+
+            {/* Answer */}
+            <div className="space-y-3">
+              <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">Generated Answer</p>
+              <div className="bg-card p-6">
+                <p className="text-sm text-foreground leading-relaxed font-light">{result.answer}</p>
               </div>
             </div>
 
-            <div>
-              <h2 className="text-sm font-bold text-primary tracking-widest uppercase mb-3">
-                RETRIEVED REFERENCES ({result.retrieved_chunks.length})
-              </h2>
-              <p className="text-xs text-muted-foreground mb-4">
-                These are the exact text blocks the system retrieved. Expand each to see the raw context passed to the AI.
+            {/* Retrieved Chunks */}
+            <div className="space-y-3">
+              <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">
+                Retrieved References — {result.retrieved_chunks.length} blocks
               </p>
-              <div className="space-y-2">
+              <p className="text-xs text-muted-foreground font-light">
+                These are the exact text blocks passed to the AI as context. Expand each to inspect.
+              </p>
+              <div className="space-y-1">
                 {result.retrieved_chunks.map(chunk => <ChunkCard key={chunk.rank} chunk={chunk} />)}
               </div>
             </div>
 
-            <div>
-              <h2 className="text-sm font-bold text-primary tracking-widest uppercase mb-3">SOURCE ATTRIBUTION</h2>
-              <div className="border border-border">
+            {/* Source Table */}
+            <div className="space-y-3">
+              <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">Source Attribution</p>
+              <div className="bg-card">
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>Document</TableHead>
-                      <TableHead>Retrieved Snippet</TableHead>
+                    <TableRow className="border-0 hover:bg-transparent">
+                      <TableHead className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">Document</TableHead>
+                      <TableHead className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">Snippet</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {result.sources.map((s, i) => (
-                      <TableRow key={i}>
+                      <TableRow key={i} className="border-0 hover:bg-accent/30">
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <FileText className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                            <FileText className="h-3.5 w-3.5 text-primary shrink-0" />
                             <span className="font-mono text-xs">{s.source}</span>
                           </div>
                         </TableCell>
@@ -140,6 +156,7 @@ export default function EvaluatePage() {
                 </Table>
               </div>
             </div>
+
           </div>
         )}
       </main>

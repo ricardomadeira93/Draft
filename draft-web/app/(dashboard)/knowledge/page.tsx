@@ -1,13 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
-import { ArrowLeft, Database, Upload, CheckCircle2, Trash2, FileText, Loader2 } from "lucide-react";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { Upload, CheckCircle2, Trash2, FileText, Loader2 } from "lucide-react";
 
 interface KBFile {
   filename: string;
@@ -36,32 +33,20 @@ export default function KnowledgeBase() {
     }
   }, []);
 
-  useEffect(() => {
-    fetchFiles();
-  }, [fetchFiles]);
+  useEffect(() => { fetchFiles(); }, [fetchFiles]);
 
   const handleUpload = async () => {
     if (!file) return;
     setUploading(true);
     setSuccessMsg("");
-
     const formData = new FormData();
     formData.append("file", file);
-
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
-      const res = await fetch(`${API_URL}/upload-kb`, {
-        method: "POST",
-        body: formData,
-      });
+      const res = await fetch(`${API_URL}/upload-kb`, { method: "POST", body: formData });
       const data = await res.json();
-      if (res.ok) {
-        setSuccessMsg(data.message);
-        setFile(null);
-        await fetchFiles();
-      } else {
-        alert("Upload failed. Check server logs.");
-      }
+      if (res.ok) { setSuccessMsg(data.message); setFile(null); await fetchFiles(); }
+      else alert("Upload failed. Check server logs.");
     } catch {
       alert("Error connecting to the backend. Is FastAPI running?");
     } finally {
@@ -73,16 +58,9 @@ export default function KnowledgeBase() {
     setDeletingFile(filename);
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
-      const res = await fetch(
-        `${API_URL}/kb/files/${encodeURIComponent(filename)}`,
-        { method: "DELETE" }
-      );
-      if (res.ok) {
-        await fetchFiles();
-      } else {
-        const data = await res.json();
-        alert(data.detail ?? "Delete failed.");
-      }
+      const res = await fetch(`${API_URL}/kb/files/${encodeURIComponent(filename)}`, { method: "DELETE" });
+      if (res.ok) await fetchFiles();
+      else { const data = await res.json(); alert(data.detail ?? "Delete failed."); }
     } catch {
       alert("Error connecting to the backend. Is FastAPI running?");
     } finally {
@@ -92,110 +70,103 @@ export default function KnowledgeBase() {
 
   return (
     <div className="min-h-screen bg-background">
-      <main className="max-w-5xl mx-auto px-6 py-12 space-y-10">
-        {/* Page Title */}
+      <main className="max-w-4xl mx-auto px-8 py-14 space-y-12">
+
+        {/* Header */}
         <div>
-          <p className="text-primary text-xs font-bold tracking-widest uppercase mb-2">KNOWLEDGE LIBRARY</p>
-          <h1 className="text-4xl font-bold tracking-tight">Knowledge Base</h1>
-          <p className="text-muted-foreground mt-2 max-w-xl">
-            Upload company policies, security docs, and past RFPs. The AI will securely index them to generate accurate answers later.
+          <p className="font-mono text-[11px] tracking-[0.2em] uppercase text-primary mb-3">
+            Knowledge Library
+          </p>
+          <h1 className="text-3xl font-light tracking-tight text-foreground">
+            Document Index
+          </h1>
+          <p className="text-muted-foreground mt-2 text-sm font-light max-w-xl">
+            Upload company policies, security docs, and past RFPs. The AI will securely index them to generate accurate answers.
           </p>
         </div>
 
         {/* Upload Zone */}
-        <Card className="border-border">
-          <CardHeader>
-            <CardTitle className="text-base font-medium">Upload Document</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="border-2 border-dashed border-border hover:border-primary/50 transition-colors p-10 text-center">
-              <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-4" />
-              <Input
-                type="file"
-                accept=".txt,.pdf,.md"
-                className="max-w-xs mx-auto"
-                onChange={(e) => {
-                  setSuccessMsg("");
-                  setFile(e.target.files?.[0] || null);
-                }}
-              />
-              <p className="text-xs text-muted-foreground mt-3">Accepts .txt, .md files</p>
+        <div className="space-y-4">
+          <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">
+            Upload Document
+          </p>
+          <div className="bg-card p-8 text-center space-y-4">
+            <Upload className="h-6 w-6 text-muted-foreground mx-auto" />
+            <Input
+              type="file"
+              accept=".txt,.pdf,.md"
+              className="max-w-xs mx-auto bg-transparent border-0 text-sm font-mono text-muted-foreground"
+              onChange={(e) => { setSuccessMsg(""); setFile(e.target.files?.[0] || null); }}
+            />
+            <p className="text-[11px] font-mono text-muted-foreground">Accepts .txt, .md files</p>
+          </div>
+
+          {successMsg && (
+            <div className="flex items-center gap-3 p-4 bg-card text-primary">
+              <CheckCircle2 className="h-4 w-4 shrink-0" />
+              <p className="text-xs font-mono">{successMsg}</p>
             </div>
+          )}
 
-            {successMsg && (
-              <div className="p-4 bg-green-500/10 border border-green-500/20 flex items-center gap-3 text-green-400">
-                <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
-                <p className="text-sm">{successMsg}</p>
-              </div>
-            )}
+          <Button
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase rounded-none h-10"
+            onClick={handleUpload}
+            disabled={!file || uploading}
+          >
+            {uploading ? <><Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />Processing...</> : "Add to Library"}
+          </Button>
+        </div>
 
-            <Button
-              className="w-full rounded-[1rem] bg-primary hover:bg-primary/90 text-primary-foreground"
-              onClick={handleUpload}
-              disabled={!file || uploading}
-            >
-              {uploading ? (
-                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...</>
-              ) : (
-                "Add to Library"
-              )}
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* File Inventory Table */}
-        <div>
-          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <FileText className="h-5 w-5 text-primary" />
+        {/* File Table */}
+        <div className="space-y-4">
+          <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">
             Indexed Documents
-          </h2>
+          </p>
 
           {loadingFiles ? (
             <div className="flex items-center gap-3 text-muted-foreground py-8">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span className="text-sm">Loading knowledge base...</span>
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              <span className="text-xs font-mono">Loading index...</span>
             </div>
           ) : kbFiles.length === 0 ? (
-            <div className="border border-border p-12 text-center text-muted-foreground text-sm">
-              No documents indexed yet. Upload a file above to get started.
+            <div className="bg-card p-12 text-center text-muted-foreground text-xs font-mono">
+              No documents indexed yet.
             </div>
           ) : (
-            <div className="border border-border">
+            <div className="bg-card">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead>Document Name</TableHead>
-                    <TableHead>Size</TableHead>
-                    <TableHead>Added On</TableHead>
-                    <TableHead className="w-16 text-right">Delete</TableHead>
+                  <TableRow className="border-0 hover:bg-transparent">
+                    <TableHead className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">Document</TableHead>
+                    <TableHead className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">Blocks</TableHead>
+                    <TableHead className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">Added</TableHead>
+                    <TableHead className="w-12" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {kbFiles.map((f) => (
-                    <TableRow key={f.filename}>
-                      <TableCell className="font-mono text-sm text-foreground">{f.filename}</TableCell>
-                      <TableCell>
-                        <span className="text-primary font-medium">{f.chunk_count}</span>
-                        <span className="text-muted-foreground text-xs ml-1">blocks</span>
+                    <TableRow key={f.filename} className="border-0 hover:bg-accent/30">
+                      <TableCell className="font-mono text-xs text-foreground">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-3.5 w-3.5 text-primary shrink-0" />
+                          {f.filename}
+                        </div>
                       </TableCell>
-                      <TableCell className="text-muted-foreground text-xs">
-                        {new Date(f.uploaded_at).toLocaleDateString("en-US", {
-                          year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit",
-                        })}
+                      <TableCell>
+                        <span className="font-mono text-xs text-primary">{f.chunk_count}</span>
+                      </TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground">
+                        {new Date(f.uploaded_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
                       </TableCell>
                       <TableCell className="text-right">
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 text-muted-foreground hover:text-red-400 hover:bg-red-500/10"
+                          className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-transparent rounded-none"
                           onClick={() => handleDelete(f.filename)}
                           disabled={deletingFile === f.filename}
                         >
-                          {deletingFile === f.filename ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <Trash2 className="h-4 w-4" />
-                          )}
+                          {deletingFile === f.filename ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
                         </Button>
                       </TableCell>
                     </TableRow>

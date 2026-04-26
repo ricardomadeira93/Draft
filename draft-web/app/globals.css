@@ -22,65 +22,73 @@
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
   --radius: var(--radius);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
 }
 
 @layer base {
   :root {
-    /* Pure White / Clean Light Mode */
-    --background: 0 0% 100%; /* #FFFFFF */
-    --foreground: 222.2 84% 4.9%; /* #020817 */
-    --card: 0 0% 100%; /* #FFFFFF */
-    --card-foreground: 222.2 84% 4.9%; /* #020817 */
-    --popover: 0 0% 100%; /* #FFFFFF */
-    --popover-foreground: 222.2 84% 4.9%; /* #020817 */
-    --primary: 230 100% 50%; /* #002BFF */
-    --primary-foreground: 210 40% 98%; /* #F8FAFC */
-    --secondary: 210 40% 96.1%; /* #F1F5F9 */
-    --secondary-foreground: 222.2 47.4% 11.2%; /* #0F172A */
-    --muted: 210 40% 96.1%; /* #F1F5F9 */
-    --muted-foreground: 215.4 16.3% 46.9%; /* #64748B */
-    --accent: 210 40% 96.1%; /* #F1F5F9 */
-    --accent-foreground: 222.2 47.4% 11.2%; /* #0F172A */
-    --destructive: 0 84.2% 60.2%; /* #EF4444 */
-    --destructive-foreground: 210 40% 98%; /* #F8FAFC */
-    --border: 214.3 31.8% 91.4%; /* #E2E8F0 */
-    --input: 214.3 31.8% 91.4%; /* #E2E8F0 */
-    --ring: 230 100% 50%; /* #002BFF */
-    --radius: 1rem; /* Squircles! */
-  }
-  
-  .dark {
-    /* Deep Corporate Black-Gray */
-    --background: 210 5% 8%; /* #131415 */
-    --foreground: 210 40% 98%; /* #F8FAFC */
-    --card: 210 5% 11%; /* #1A1C1D */
-    --card-foreground: 210 40% 98%; /* #F8FAFC */
-    --popover: 210 5% 8%; /* #131415 */
-    --popover-foreground: 210 40% 98%; /* #F8FAFC */
-    --primary: 230 100% 50%; /* #002BFF */
+    /* Light: Pure white with black ink */
+    --background: 0 0% 100%;         /* #FFFFFF */
+    --foreground: 0 0% 4%;           /* #0A0A0A */
+    --card: 0 0% 98%;                /* #FAFAFA */
+    --card-foreground: 0 0% 4%;      /* #0A0A0A */
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 4%;
+    --primary: 22 100% 50%;          /* #FF5C00 orange */
     --primary-foreground: 0 0% 100%; /* #FFFFFF */
-    --secondary: 217.2 32.6% 17.5%; /* #1E293B */
-    --secondary-foreground: 210 40% 98%; /* #F8FAFC */
-    --muted: 217.2 32.6% 17.5%; /* #1E293B */
-    --muted-foreground: 215 20.2% 65.1%; /* #94A3B8 */
-    --accent: 217.2 32.6% 17.5%; /* #1E293B */
-    --accent-foreground: 210 40% 98%; /* #F8FAFC */
-    --destructive: 0 62.8% 30.6%; /* #7F1D1D */
-    --destructive-foreground: 210 40% 98%; /* #F8FAFC */
-    --border: 217.2 32.6% 17.5%; /* #1E293B */
-    --input: 217.2 32.6% 17.5%; /* #1E293B */
-    --ring: 230 100% 50%; /* #002BFF */
+    --secondary: 0 0% 95%;           /* #F2F2F2 */
+    --secondary-foreground: 0 0% 10%;
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 45%;    /* #737373 */
+    --accent: 0 0% 95%;
+    --accent-foreground: 0 0% 4%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 90%;              /* #E5E5E5 very subtle */
+    --input: 0 0% 90%;
+    --ring: 22 100% 50%;             /* orange focus ring */
+    --radius: 0.25rem;               /* sharp, minimal */
+  }
+
+  .dark {
+    /* Dark: True black with white ink */
+    --background: 0 0% 4%;           /* #0A0A0A */
+    --foreground: 0 0% 96%;          /* #F5F5F5 */
+    --card: 0 0% 7%;                 /* #111111 */
+    --card-foreground: 0 0% 96%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 96%;
+    --primary: 22 100% 50%;          /* #FF5C00 orange */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 12%;           /* #1F1F1F */
+    --secondary-foreground: 0 0% 90%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 50%;    /* #808080 */
+    --accent: 0 0% 12%;
+    --accent-foreground: 0 0% 96%;
+    --destructive: 0 70% 45%;
+    --destructive-foreground: 0 0% 96%;
+    --border: 0 0% 14%;              /* #242424 barely there */
+    --input: 0 0% 14%;
+    --ring: 22 100% 50%;
   }
 }
 
 @layer base {
   * {
     border-color: hsl(var(--border));
-    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.15s ease;
   }
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    @apply font-sans antialiased;
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 300;
+    letter-spacing: -0.01em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  code, kbd, pre, samp, .font-mono {
+    font-family: var(--font-mono), ui-monospace, monospace;
   }
 }
