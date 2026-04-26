@@ -25,6 +25,31 @@ function downloadCSV(rows: QARow[], filename: string) {
   URL.revokeObjectURL(url); document.body.removeChild(a);
 }
 
+async function handleExportDoc(results: QARow[], format: "pdf" | "docx", originalFilename: string, setExporting: (state: boolean) => void) {
+  setExporting(true);
+  try {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+    const res = await fetch(`${API_URL}/export`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ results, format })
+    });
+    if (!res.ok) throw new Error("Failed to export document");
+    
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; 
+    a.download = `answered_${originalFilename.replace(".csv", "")}.${format}`;
+    document.body.appendChild(a); a.click();
+    URL.revokeObjectURL(url); document.body.removeChild(a);
+  } catch (e) {
+    alert("Export failed. Ensure backend has weasyprint/python-docx installed.");
+  } finally {
+    setExporting(false);
+  }
+}
+
 function countCsvRows(file: File): Promise<number> {
   return new Promise(resolve => {
     const reader = new FileReader();
@@ -115,6 +140,7 @@ export default function Workspace() {
   const [file, setFile] = useState<File | null>(null);
   const [rowCount, setRowCount] = useState<number>(0);
   const [loading, setLoading] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [language, setLanguage] = useState("English");
   const [results, setResults] = useState<QARow[] | null>(null);
@@ -250,15 +276,38 @@ export default function Workspace() {
                   Results — {results.length} {results.length === 1 ? "answer" : "answers"}
                 </p>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="font-mono text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground rounded-none gap-2 hover:bg-transparent"
-                onClick={() => downloadCSV(results, `answered_${file?.name ?? "rfp.csv"}`)}
-              >
-                <Download className="h-4 w-4" />
-                Export CSV
-              </Button>
+              
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="font-mono text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground rounded-none gap-2 hover:bg-transparent"
+                  onClick={() => handleExportDoc(results, "pdf", file?.name ?? "rfp.csv", setExporting)}
+                  disabled={exporting}
+                >
+                  {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                  PDF
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="font-mono text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground rounded-none gap-2 hover:bg-transparent"
+                  onClick={() => handleExportDoc(results, "docx", file?.name ?? "rfp.csv", setExporting)}
+                  disabled={exporting}
+                >
+                  {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                  Word
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="font-mono text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground rounded-none gap-2 hover:bg-transparent"
+                  onClick={() => downloadCSV(results, `answered_${file?.name ?? "rfp.csv"}`)}
+                >
+                  <Download className="h-4 w-4" />
+                  CSV
+                </Button>
+              </div>
             </div>
 
             {results.length === 0 ? (

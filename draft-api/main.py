@@ -8,8 +8,10 @@ import certifi
 os.environ["SSL_CERT_FILE"] = certifi.where()
 ssl._create_default_https_context = ssl._create_unverified_context
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from typing import List
 
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_pinecone import PineconeVectorStore
@@ -117,6 +119,78 @@ async def process_csv(file: UploadFile = File(...), language: str = Form("Englis
         })
 
     return {"results": results}
+
+
+# ─── Export Processing ────────────────────────────────────────────────────────
+
+class SourceModel(BaseModel):
+    source: str
+    snippet: str
+
+class QARowModel(BaseModel):
+    Question: str
+    Answer: str
+    Sources: List[SourceModel]
+
+class ExportRequest(BaseModel):
+    results: List[QARowModel]
+    format: str
+
+@app.post("/export")
+async def export_results(body: ExportRequest):
+    """Generate a PDF or DOCX file from the generated answers."""
+    if not body.results:
+        raise HTTPException(status_code=400, detail="No results provided to export.")
+    
+    if body.format == "pdf":
+        try:
+            from weasyprint import HTML
+            # Generate a simple HTML string to convert to PDF
+            html_content = "<html><head><style>body { font-family: sans-serif; }</style></head><body>"
+            html_content += "<h1>RFP Answers</h1>"
+            for row in body.results:
+                html_content += f"<h2>Q: {row.Question}</h2>"
+                html_content += f"<p><strong>A:</strong> {row.Answer}</p>"
+                sources = ", ".join([s.source for s in row.Sources])
+                html_content += f"<p><small><em>Sources: {sources}</em></small></p><hr>"
+            html_content += "</body></html>"
+            
+            pdf_bytes = HTML(string=html_content).write_pdf()
+            return StreamingResponse(
+                io.BytesIO(pdf_bytes),
+                media_type="application/pdf",
+                headers={"Content-Disposition": "attachment; filename=rfp_answers.pdf"}
+            )
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"PDF generation failed: {e}")
+            
+    elif body.format == "docx":
+        try:
+            from docx import Document
+            document = Document()
+            document.add_heading('RFP Answers', 0)
+            
+            for row in body.results:
+                document.add_heading(row.Question, level=1)
+                document.add_paragraph(row.Answer)
+                sources = ", ".join([s.source for s in row.Sources])
+                p = document.add_paragraph()
+                p.add_run(f"Sources: {sources}").italic = True
+                
+            file_stream = io.BytesIO()
+            document.save(file_stream)
+            file_stream.seek(0)
+            
+            return StreamingResponse(
+                file_stream,
+                media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                headers={"Content-Disposition": "attachment; filename=rfp_answers.docx"}
+            )
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"DOCX generation failed: {e}")
+            
+    else:
+        raise HTTPException(status_code=400, detail="Invalid format. Use 'pdf' or 'docx'.")
 
 
 # ─── Evaluation Dashboard ─────────────────────────────────────────────────────
