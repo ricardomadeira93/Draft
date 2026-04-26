@@ -30,9 +30,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Nav */}
         <nav className="flex-1 px-3 py-2 space-y-0.5">
           <Link
-            href="/"
+            href="/dashboard"
             className={`flex items-center gap-2.5 px-2 py-2 text-xs font-mono tracking-wide rounded-sm transition-colors ${
-              pathname === "/" ? "text-foreground bg-accent" : "text-muted-foreground hover:text-foreground hover:bg-accent"
+              pathname === "/dashboard" ? "text-foreground bg-accent" : "text-muted-foreground hover:text-foreground hover:bg-accent"
             }`}
           >
             <LayoutDashboard className="h-3.5 w-3.5 shrink-0" />

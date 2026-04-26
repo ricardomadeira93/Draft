@@ -1,0 +1,34 @@
+⨯ Error: Cannot find module '/Users/ricardomadeira/Documents/Business/RFP/draft-web/.next/server/app/_not-found/page.js'
+Require stack:
+- /Users/ricardomadeira/Documents/Business/RFP/draft-web/node_modules/.pnpm/next@16.2.4_@babel+core@7.29.0_babel-plugin-react-compiler@1.0.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/next/dist/server/require.js
+- /Users/ricardomadeira/Documents/Business/RFP/draft-web/node_modules/.pnpm/next@16.2.4_@babel+core@7.29.0_babel-plugin-react-compiler@1.0.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/next/dist/server/next-server.js
+- /Users/ricardomadeira/Documents/Business/RFP/draft-web/node_modules/.pnpm/next@16.2.4_@babel+core@7.29.0_babel-plugin-react-compiler@1.0.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/next/dist/server/next.js
+- /Users/ricardomadeira/Documents/Business/RFP/draft-web/node_modules/.pnpm/next@16.2.4_@babel+core@7.29.0_babel-plugin-react-compiler@1.0.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/next/dist/server/lib/start-server.js
+- /Users/ricardomadeira/Documents/Business/RFP/draft-web/node_modules/.pnpm/next@16.2.4_@babel+core@7.29.0_babel-plugin-react-compiler@1.0.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/next/dist/cli/next-start.js
+    at ignore-listed frames {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/Users/ricardomadeira/Documents/Business/RFP/draft-web/node_modules/.pnpm/next@16.2.4_@babel+core@7.29.0_babel-plugin-react-compiler@1.0.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/next/dist/server/require.js',
+    '/Users/ricardomadeira/Documents/Business/RFP/draft-web/node_modules/.pnpm/next@16.2.4_@babel+core@7.29.0_babel-plugin-react-compiler@1.0.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/next/dist/server/next-server.js',
+    '/Users/ricardomadeira/Documents/Business/RFP/draft-web/node_modules/.pnpm/next@16.2.4_@babel+core@7.29.0_babel-plugin-react-compiler@1.0.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/next/dist/server/next.js',
+    '/Users/ricardomadeira/Documents/Business/RFP/draft-web/node_modules/.pnpm/next@16.2.4_@babel+core@7.29.0_babel-plugin-react-compiler@1.0.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/next/dist/server/lib/start-server.js',
+    '/Users/ricardomadeira/Documents/Business/RFP/draft-web/node_modules/.pnpm/next@16.2.4_@babel+core@7.29.0_babel-plugin-react-compiler@1.0.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/next/dist/cli/next-start.js'
+  ]
+}
+⨯ Error: Cannot find module '/Users/ricardomadeira/Documents/Business/RFP/draft-web/.next/server/app/_not-found/page.js'
+Require stack:
+- /Users/ricardomadeira/Documents/Business/RFP/draft-web/node_modules/.pnpm/next@16.2.4_@babel+core@7.29.0_babel-plugin-react-compiler@1.0.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/next/dist/server/require.js
+- /Users/ricardomadeira/Documents/Business/RFP/draft-web/node_modules/.pnpm/next@16.2.4_@babel+core@7.29.0_babel-plugin-react-compiler@1.0.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/next/dist/server/next-server.js
+- /Users/ricardomadeira/Documents/Business/RFP/draft-web/node_modules/.pnpm/next@16.2.4_@babel+core@7.29.0_babel-plugin-react-compiler@1.0.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/next/dist/server/next.js
+- /Users/ricardomadeira/Documents/Business/RFP/draft-web/node_modules/.pnpm/next@16.2.4_@babel+core@7.29.0_babel-plugin-react-compiler@1.0.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/next/dist/server/lib/start-server.js
+- /Users/ricardomadeira/Documents/Business/RFP/draft-web/node_modules/.pnpm/next@16.2.4_@babel+core@7.29.0_babel-plugin-react-compiler@1.0.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/next/dist/cli/next-start.js
+    at ignore-listed frames {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/Users/ricardomadeira/Documents/Business/RFP/draft-web/node_modules/.pnpm/next@16.2.4_@babel+core@7.29.0_babel-plugin-react-compiler@1.0.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/next/dist/server/require.js',
+    '/Users/ricardomadeira/Documents/Business/RFP/draft-web/node_modules/.pnpm/next@16.2.4_@babel+core@7.29.0_babel-plugin-react-compiler@1.0.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/next/dist/server/next-server.js',
+    '/Users/ricardomadeira/Documents/Business/RFP/draft-web/node_modules/.pnpm/next@16.2.4_@babel+core@7.29.0_babel-plugin-react-compiler@1.0.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/next/dist/server/next.js',
+    '/Users/ricardomadeira/Documents/Business/RFP/draft-web/node_modules/.pnpm/next@16.2.4_@babel+core@7.29.0_babel-plugin-react-compiler@1.0.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/next/dist/server/lib/start-server.js',
+    '/Users/ricardomadeira/Documents/Business/RFP/draft-web/node_modules/.pnpm/next@16.2.4_@babel+core@7.29.0_babel-plugin-react-compiler@1.0.0_react-dom@19.2.4_react@19.2.4__react@19.2.4/node_modules/next/dist/cli/next-start.js'
+  ]
+}

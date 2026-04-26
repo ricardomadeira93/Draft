@@ -29,7 +29,7 @@ export default async function Home() {
               <ThemeToggle />
               {userId ? (
                 <>
-                  <Link href="/setup">
+                  <Link href="/dashboard">
                     <Button size="sm" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-6 h-9">
                       App →
                     </Button>
@@ -66,7 +66,7 @@ export default async function Home() {
 
         <div className="mt-12 flex flex-col sm:flex-row gap-4">
           {userId ? (
-            <Link href="/setup">
+            <Link href="/dashboard">
               <Button size="lg" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-8 h-12">
                 Open Workspace
               </Button>
@@ -264,7 +264,7 @@ export default async function Home() {
           </div>
           <div className="flex flex-col sm:flex-row gap-4 shrink-0">
             {userId ? (
-              <Link href="/setup">
+              <Link href="/dashboard">
                 <Button size="lg" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-8 h-12">
                   Open Workspace
                 </Button>
