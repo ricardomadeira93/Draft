@@ -17,6 +17,8 @@ def get_current_org(credentials: HTTPAuthorizationCredentials = Depends(security
         # In production: jwt.decode(token, key=jwks_key, algorithms=["RS256"], audience="...")
         payload = jwt.decode(token, options={"verify_signature": False})
         
+        print(f"Decoded JWT Payload: {payload}")
+        
         user_id = payload.get("sub")
         org_id = payload.get("org_id")
         
@@ -31,6 +33,8 @@ def get_current_org(credentials: HTTPAuthorizationCredentials = Depends(security
             
         return {"user_id": user_id, "org_id": org_id}
         
+    except HTTPException:
+        raise
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token has expired")
     except Exception as e:
