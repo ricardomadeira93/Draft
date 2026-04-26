@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
@@ -8,6 +8,9 @@ import { FileText, Download, Loader2, FileCheck } from "lucide-react";
 
 interface Source { source: string; snippet: string; }
 interface QARow { Question: string; Answer: string; Sources: Source[]; }
+
+// ~6 seconds per question is a conservative estimate for cold Render + Groq
+const SECS_PER_QUESTION = 6;
 
 function downloadCSV(rows: QARow[], filename: string) {
   const header = "Question,Answer,Sources\n";
@@ -22,10 +25,116 @@ function downloadCSV(rows: QARow[], filename: string) {
   URL.revokeObjectURL(url); document.body.removeChild(a);
 }
 
+function countCsvRows(file: File): Promise<number> {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const text = e.target?.result as string ?? "";
+      // subtract 1 for the header row, minimum 1
+      const rows = text.trim().split("\n").length - 1;
+      resolve(Math.max(rows, 1));
+    };
+    reader.readAsText(file);
+  });
+}
+
+function formatTime(seconds: number): string {
+  if (seconds < 60) return `${Math.round(seconds)}s`;
+  return `${Math.floor(seconds / 60)}m ${Math.round(seconds % 60)}s`;
+}
+
+function ProcessingState({ rowCount, elapsed }: { rowCount: number; elapsed: number }) {
+  const estimated = rowCount * SECS_PER_QUESTION;
+  const progress = Math.min((elapsed / estimated) * 100, 95); // cap at 95% until done
+  const remaining = Math.max(estimated - elapsed, 0);
+  // Rough "current row" estimate
+  const currentRow = Math.min(Math.floor(elapsed / SECS_PER_QUESTION) + 1, rowCount);
+
+  return (
+    <div className="bg-card p-8 space-y-6">
+      {/* Status line */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Loader2 className="h-3.5 w-3.5 text-primary animate-spin shrink-0" />
+          <span className="font-mono text-xs text-foreground">
+            Writing answer {currentRow} of {rowCount}...
+          </span>
+        </div>
+        <span className="font-mono text-[11px] text-muted-foreground">
+          {formatTime(elapsed)} elapsed
+        </span>
+      </div>
+
+      {/* Progress bar */}
+      <div className="relative h-[2px] bg-secondary w-full overflow-hidden">
+        <div
+          className="absolute inset-y-0 left-0 bg-primary transition-all duration-1000 ease-linear"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+
+      {/* ETA */}
+      <div className="flex items-center justify-between">
+        <div className="flex gap-6">
+          <div>
+            <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground mb-1">Questions</p>
+            <p className="font-mono text-sm text-foreground">{rowCount}</p>
+          </div>
+          <div>
+            <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground mb-1">Estimated total</p>
+            <p className="font-mono text-sm text-foreground">{formatTime(estimated)}</p>
+          </div>
+          <div>
+            <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground mb-1">Time remaining</p>
+            <p className="font-mono text-sm text-primary">{formatTime(remaining)}</p>
+          </div>
+        </div>
+        <p className="font-mono text-[10px] text-muted-foreground">
+          {Math.round(progress)}%
+        </p>
+      </div>
+
+      {/* Blinking activity dots */}
+      <div className="flex items-center gap-1.5 pt-1">
+        {Array.from({ length: rowCount }).map((_, i) => (
+          <div
+            key={i}
+            className="h-1 w-1 rounded-full bg-primary/30"
+            style={{
+              backgroundColor: i < currentRow ? "hsl(22 100% 50%)" : undefined,
+              opacity: i === currentRow - 1 ? 1 : i < currentRow - 1 ? 0.6 : 0.2,
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Workspace() {
   const [file, setFile] = useState<File | null>(null);
+  const [rowCount, setRowCount] = useState<number>(0);
   const [loading, setLoading] = useState(false);
+  const [elapsed, setElapsed] = useState(0);
   const [results, setResults] = useState<QARow[] | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Parse row count whenever file changes
+  useEffect(() => {
+    if (!file) { setRowCount(0); return; }
+    countCsvRows(file).then(setRowCount);
+  }, [file]);
+
+  // Elapsed timer while loading
+  useEffect(() => {
+    if (loading) {
+      setElapsed(0);
+      timerRef.current = setInterval(() => setElapsed(s => s + 1), 1000);
+    } else {
+      if (timerRef.current) clearInterval(timerRef.current);
+    }
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [loading]);
 
   const handleProcess = async () => {
     if (!file) return;
@@ -63,36 +172,55 @@ export default function Workspace() {
           </p>
         </div>
 
-        {/* Upload */}
-        <div className="space-y-4">
-          <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">
-            Upload Questionnaire
-          </p>
-          <div className="bg-card p-8 text-center space-y-4">
-            <FileText className="h-6 w-6 text-muted-foreground mx-auto" />
-            <Input
-              type="file"
-              accept=".csv"
-              className="max-w-xs mx-auto bg-transparent border-0 text-sm font-mono text-muted-foreground"
-              onChange={e => { setResults(null); setFile(e.target.files?.[0] || null); }}
-            />
-            <p className="text-[11px] font-mono text-muted-foreground">CSV must have a &quot;Question&quot; column</p>
-          </div>
+        {/* Upload — hidden while processing */}
+        {!loading && (
+          <div className="space-y-4">
+            <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">
+              Upload Questionnaire
+            </p>
+            <div className="bg-card p-8 text-center space-y-4">
+              <FileText className="h-6 w-6 text-muted-foreground mx-auto" />
+              <Input
+                type="file"
+                accept=".csv"
+                className="max-w-xs mx-auto bg-transparent border-0 text-sm font-mono text-muted-foreground"
+                onChange={e => { setResults(null); setFile(e.target.files?.[0] || null); }}
+              />
+              {rowCount > 0 && (
+                <p className="font-mono text-[11px] text-primary">
+                  {rowCount} question{rowCount !== 1 ? "s" : ""} detected
+                  <span className="text-muted-foreground ml-2">
+                    — est. {formatTime(rowCount * SECS_PER_QUESTION)}
+                  </span>
+                </p>
+              )}
+              {!rowCount && (
+                <p className="text-[11px] font-mono text-muted-foreground">CSV must have a &quot;Question&quot; column</p>
+              )}
+            </div>
 
-          <Button
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase rounded-none h-10"
-            onClick={handleProcess}
-            disabled={!file || loading}
-          >
-            {loading
-              ? <><Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />AI is writing answers...</>
-              : "Generate Answers"
-            }
-          </Button>
-        </div>
+            <Button
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase rounded-none h-10"
+              onClick={handleProcess}
+              disabled={!file || loading}
+            >
+              Generate Answers
+            </Button>
+          </div>
+        )}
+
+        {/* Processing state */}
+        {loading && (
+          <div className="space-y-3">
+            <p className="font-mono text-[10px] tracking-[0.15em] uppercase text-muted-foreground">
+              Processing
+            </p>
+            <ProcessingState rowCount={rowCount} elapsed={elapsed} />
+          </div>
+        )}
 
         {/* Results */}
-        {results !== null && (
+        {results !== null && !loading && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
