@@ -21,6 +21,6 @@ def get_llm():
     Defaults to Groq if GROQ_API_KEY is present, otherwise uses local Ollama.
     """
     if os.getenv("GROQ_API_KEY"):
-        return ChatGroq(model="llama3-8b-8192")
+        return ChatGroq(model="llama-3.1-8b-instant")
     else:
         return ChatOllama(model="llama3")
