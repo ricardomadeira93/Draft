@@ -171,25 +171,66 @@ async def export_results(body: ExportRequest, user: dict = Depends(get_current_o
     
     if body.format == "pdf":
         try:
-            from weasyprint import HTML
-            # Generate a simple HTML string to convert to PDF
-            html_content = "<html><head><style>body { font-family: sans-serif; }</style></head><body>"
-            html_content += "<h1>RFP Answers</h1>"
-            for row in body.results:
-                html_content += f"<h2>Q: {row.Question}</h2>"
-                html_content += f"<p><strong>A:</strong> {row.Answer}</p>"
-                sources = ", ".join([s.source for s in row.Sources])
-                html_content += f"<p><small><em>Sources: {sources}</em></small></p><hr>"
-            html_content += "</body></html>"
-            
-            pdf_bytes = HTML(string=html_content).write_pdf()
+            from reportlab.lib.pagesizes import A4
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+            from reportlab.lib.units import mm
+            from reportlab.lib import colors
+            from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
+            from reportlab.lib.enums import TA_LEFT
+
+            buf = io.BytesIO()
+            doc = SimpleDocTemplate(
+                buf,
+                pagesize=A4,
+                leftMargin=20*mm,
+                rightMargin=20*mm,
+                topMargin=20*mm,
+                bottomMargin=20*mm,
+            )
+
+            styles = getSampleStyleSheet()
+            title_style = ParagraphStyle(
+                "title", parent=styles["Heading1"],
+                fontSize=18, spaceAfter=6, textColor=colors.HexColor("#0a0a0a")
+            )
+            question_style = ParagraphStyle(
+                "question", parent=styles["Normal"],
+                fontSize=10, fontName="Helvetica-Bold",
+                spaceAfter=4, textColor=colors.HexColor("#0a0a0a")
+            )
+            answer_style = ParagraphStyle(
+                "answer", parent=styles["Normal"],
+                fontSize=10, spaceAfter=4, leading=14,
+                textColor=colors.HexColor("#1a1a1a")
+            )
+            source_style = ParagraphStyle(
+                "source", parent=styles["Normal"],
+                fontSize=8, textColor=colors.HexColor("#737373"),
+                spaceAfter=2
+            )
+
+            story = [Paragraph("RFP Answers", title_style), Spacer(1, 6*mm)]
+
+            for i, row in enumerate(body.results):
+                story.append(Paragraph(f"Q{i+1}. {row.Question}", question_style))
+                story.append(Paragraph(row.Answer, answer_style))
+                if row.Sources:
+                    sources_str = " · ".join(s.source for s in row.Sources)
+                    story.append(Paragraph(f"Source: {sources_str}", source_style))
+                if i < len(body.results) - 1:
+                    story.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor("#e5e5e5"), spaceAfter=8))
+                story.append(Spacer(1, 4*mm))
+
+            doc.build(story)
+            buf.seek(0)
             return StreamingResponse(
-                io.BytesIO(pdf_bytes),
+                buf,
                 media_type="application/pdf",
                 headers={"Content-Disposition": "attachment; filename=rfp_answers.pdf"}
             )
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"PDF generation failed: {e}")
+
             
     elif body.format == "docx":
         try:

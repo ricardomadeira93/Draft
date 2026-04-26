@@ -7,8 +7,8 @@
     "settings": "Configurações"
   },
   "Landing": {
-    "nav_inspector": "Inspetor de Respostas",
-    "nav_library": "Biblioteca de Conhecimento",
+    "nav_inspector": "Respostas",
+    "nav_library": "Biblioteca",
     "login": "Entrar",
     "open_workspace": "Abrir Espaço de Trabalho",
     "start_free": "Começar Grátis",
@@ -17,7 +17,7 @@
     "hero_title_1": "Equipes de vendas perdem ",
     "hero_title_highlight": "40+ horas",
     "hero_title_2": "por RFP.",
-    "hero_title_3": "Eu criei a solução.",
+    "hero_title_3": "Aqui está a solução.",
     "hero_desc": "O Draft lê os documentos da sua empresa e escreve automaticamente respostas precisas e referenciadas para questionários de segurança e pedidos de compra — em minutos, não semanas.",
     "problem_tag": "O Problema",
     "problem_title": "RFPs são um problema de US$ 10 bilhões escondido.",
