@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Loader2, Download, FileText, Share2 } from "lucide-react";
 import { toast } from "sonner";
-import { useAuth } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
 
 interface HistoryItem {
@@ -36,46 +35,40 @@ export default function HistoryPage() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
-  const { getToken, orgId } = useAuth();
   const t = useTranslations("History");
 
-  const fetchHistory = useCallback(async () => {
-    try {
-      const token = await getToken();
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
-      const res = await fetch(`${API_URL}/history`, {
-        cache: "no-store",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          ...(orgId && { "X-Org-Id": orgId })
-        }
-      });
-      const data = await res.json();
-      setHistory(data.history || []);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  }, [getToken, orgId]);
-
   useEffect(() => {
-    fetchHistory();
-  }, [fetchHistory]);
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+        const res = await fetch(`${API_URL}/history`, { cache: "no-store" });
+        const data = await res.json();
+        if (!cancelled) {
+          setHistory(data.history || []);
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleDownload = async (item: HistoryItem, format: "csv" | "pdf" | "docx") => {
     setDownloadingId(item.id);
     try {
-      const token = await getToken();
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
       
       // 1. Fetch the full answers for this session
-      const res = await fetch(`${API_URL}/history/${item.id}`, {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          ...(orgId && { "X-Org-Id": orgId })
-        }
-      });
+      const res = await fetch(`${API_URL}/history/${item.id}`);
       if (!res.ok) throw new Error("Failed to fetch history details");
       const data = await res.json();
       const results: QARow[] = data.answers;
@@ -86,11 +79,7 @@ export default function HistoryPage() {
       } else {
         const exportRes = await fetch(`${API_URL}/export`, {
           method: "POST",
-          headers: { 
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-            ...(orgId && { "X-Org-Id": orgId })
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ results, format })
         });
         if (!exportRes.ok) throw new Error("Export failed");
@@ -102,7 +91,7 @@ export default function HistoryPage() {
         document.body.appendChild(a); a.click();
         URL.revokeObjectURL(url); document.body.removeChild(a);
       }
-    } catch (e) {
+    } catch {
       toast.error("Export failed", { description: "Please try again." });
     } finally {
       setDownloadingId(null);
@@ -112,24 +101,14 @@ export default function HistoryPage() {
   const handleShare = async (item: HistoryItem) => {
     setDownloadingId(item.id);
     try {
-      const token = await getToken();
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
       
-      const res = await fetch(`${API_URL}/history/${item.id}`, {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          ...(orgId && { "X-Org-Id": orgId })
-        }
-      });
+      const res = await fetch(`${API_URL}/history/${item.id}`);
       const data = await res.json();
       
       const shareRes = await fetch(`${API_URL}/share`, {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-          ...(orgId && { "X-Org-Id": orgId })
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ results: data.answers })
       });
       
@@ -137,7 +116,7 @@ export default function HistoryPage() {
       const shareUrl = `${window.location.origin}/review/${shareData.token}`;
       await navigator.clipboard.writeText(shareUrl);
       toast.success("Link copied to clipboard");
-    } catch (e) {
+    } catch {
       toast.error("Share failed", { description: "Please try again." });
     } finally {
       setDownloadingId(null);

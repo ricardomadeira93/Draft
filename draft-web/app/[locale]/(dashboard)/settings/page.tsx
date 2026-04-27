@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -73,27 +72,44 @@ export default function SettingsPage() {
   const [newKeyName, setNewKeyName] = useState("");
   const [createdKey, setCreatedKey] = useState<string | null>(null);
   const [revokingId, setRevokingId] = useState<string | null>(null);
-  const { getToken, orgId } = useAuth();
 
-  const authHeaders = useCallback(async (): Promise<HeadersInit> => {
-    const token = await getToken();
-    return {
-      "Authorization": `Bearer ${token}`,
-      ...(orgId && { "X-Org-Id": orgId })
-    };
-  }, [getToken, orgId]);
-
-  const fetchKeys = useCallback(async () => {
+  const fetchKeys = async () => {
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
-      const res = await fetch(`${API_URL}/api-keys`, { cache: "no-store", headers: await authHeaders() });
+      const res = await fetch(`${API_URL}/api-keys`, { cache: "no-store" });
       const data = await res.json();
       setKeys(data.keys || []);
-    } catch { /* backend may not be running */ }
-    finally { setLoading(false); }
-  }, [authHeaders]);
+    } catch {
+      // backend may not be running
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  useEffect(() => { fetchKeys(); }, [fetchKeys]);
+  useEffect(() => {
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+        const res = await fetch(`${API_URL}/api-keys`, { cache: "no-store" });
+        const data = await res.json();
+        if (!cancelled) {
+          setKeys(data.keys || []);
+        }
+      } catch {
+        // backend may not be running
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleCreate = async () => {
     if (!newKeyName.trim()) return;
@@ -102,7 +118,7 @@ export default function SettingsPage() {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
       const res = await fetch(`${API_URL}/api-keys`, {
         method: "POST",
-        headers: { ...await authHeaders(), "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: newKeyName.trim() })
       });
       const data = await res.json();
@@ -117,7 +133,7 @@ export default function SettingsPage() {
     setRevokingId(id);
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
-      await fetch(`${API_URL}/api-keys/${id}`, { method: "DELETE", headers: await authHeaders() });
+      await fetch(`${API_URL}/api-keys/${id}`, { method: "DELETE" });
       await fetchKeys();
     } catch { toast.error("Failed to revoke key", { description: "Please try again." }); }
     finally { setRevokingId(null); }

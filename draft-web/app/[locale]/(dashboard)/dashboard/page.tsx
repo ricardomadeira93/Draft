@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useAuth } from "@clerk/nextjs";
-import { FileText, FileCheck, History, ArrowRight, Loader2, Download } from "lucide-react";
+import { useState, useEffect } from "react";
+import { FileText, FileCheck, History, ArrowRight, Loader2 } from "lucide-react";
 import { Link } from "@/routing";
 
 interface HistoryItem {
@@ -35,33 +34,36 @@ export default function DashboardHome() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [kbFiles, setKbFiles] = useState<KBFile[]>([]);
   const [loading, setLoading] = useState(true);
-  const { getToken, orgId } = useAuth();
 
-  const fetchData = useCallback(async () => {
-    try {
-      const token = await getToken();
-      const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
-      const headers: HeadersInit = {
-        "Authorization": `Bearer ${token}`,
-        ...(orgId && { "X-Org-Id": orgId })
-      };
+  useEffect(() => {
+    let cancelled = false;
 
-      const [histRes, kbRes] = await Promise.all([
-        fetch(`${API_URL}/history`, { cache: "no-store", headers }),
-        fetch(`${API_URL}/kb/files`, { cache: "no-store", headers }),
-      ]);
+    void (async () => {
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+        const [histRes, kbRes] = await Promise.all([
+          fetch(`${API_URL}/history`, { cache: "no-store" }),
+          fetch(`${API_URL}/kb/files`, { cache: "no-store" }),
+        ]);
 
-      const [histData, kbData] = await Promise.all([histRes.json(), kbRes.json()]);
-      setHistory(histData.history || []);
-      setKbFiles(kbData.files || []);
-    } catch {
-      // backend may not be running
-    } finally {
-      setLoading(false);
-    }
-  }, [getToken, orgId]);
+        const [histData, kbData] = await Promise.all([histRes.json(), kbRes.json()]);
+        if (!cancelled) {
+          setHistory(histData.history || []);
+          setKbFiles(kbData.files || []);
+        }
+      } catch {
+        // backend may not be running
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    })();
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const totalQuestions = history.reduce((sum, h) => sum + h.question_count, 0);
 

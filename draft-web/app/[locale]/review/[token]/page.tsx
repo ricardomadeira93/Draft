@@ -30,7 +30,6 @@ export default function ReviewPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [answers, setAnswers] = useState<QARow[]>([]);
-  const [overallStatus, setOverallStatus] = useState<string>("pending");
   const [updating, setUpdating] = useState<number | null>(null);
 
   useEffect(() => {
@@ -46,9 +45,8 @@ export default function ReviewPage() {
         }
         const data = await res.json();
         setAnswers(data.answers);
-        setOverallStatus(data.status);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (error) {
+        setError(error instanceof Error ? error.message : "Failed to load review session.");
       } finally {
         setLoading(false);
       }
@@ -74,7 +72,7 @@ export default function ReviewPage() {
         copy[index] = { ...copy[index], review: { status: newStatus, comment } };
         return copy;
       });
-    } catch (e) {
+    } catch {
       toast.error("Could not save", { description: "Please try again." });
     } finally {
       setUpdating(null);
@@ -98,7 +96,6 @@ export default function ReviewPage() {
   }
 
   const approvedCount = answers.filter(a => a.review?.status === "approved").length;
-  const flaggedCount = answers.filter(a => a.review?.status === "flagged").length;
 
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-primary/20">

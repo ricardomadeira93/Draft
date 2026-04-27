@@ -1,9 +1,8 @@
 "use client";
 
 import { Link, usePathname } from "@/routing";
-import { Compass, Database, Search, FileText, Users, History, LayoutDashboard, Settings } from "lucide-react";
+import { Compass, Database, Search, FileText, History, LayoutDashboard, Settings } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { UserButton, OrganizationSwitcher } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/components/language-switcher";
 
@@ -83,15 +82,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             {t('history')}
           </Link>
           <Link
-            href="/team"
-            className={`flex items-center gap-2.5 px-2 py-2 text-xs font-mono tracking-wide rounded-sm transition-colors ${
-              pathname === "/team" ? "text-foreground bg-accent" : "text-muted-foreground hover:text-foreground hover:bg-accent"
-            }`}
-          >
-            <Users className="h-3.5 w-3.5 shrink-0" />
-            {t('team')}
-          </Link>
-          <Link
             href="/settings"
             className={`flex items-center gap-2.5 px-2 py-2 text-xs font-mono tracking-wide rounded-sm transition-colors ${
               pathname === "/settings" ? "text-foreground bg-accent" : "text-muted-foreground hover:text-foreground hover:bg-accent"
@@ -118,18 +108,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="flex items-center gap-4">
             <LanguageSwitcher />
             <div className="h-4 w-px bg-border mx-2" />
-            <OrganizationSwitcher 
-              appearance={{
-                elements: {
-                  organizationSwitcherTrigger: "font-mono text-xs uppercase tracking-widest text-foreground",
-                  organizationPreviewTextContainer: "font-mono text-xs uppercase tracking-widest",
-                  organizationPreviewSecondaryIdentifier: "hidden"
-                }
-              }}
-              hidePersonal={false}
-            />
-            <div className="h-4 w-px bg-border mx-2" />
-            <UserButton />
+            <ThemeToggle />
           </div>
         </header>
         <main className="flex-1 overflow-y-auto">

@@ -1,14 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
-import { ArrowLeft, FileText, Download, Loader2, FileCheck } from "lucide-react";
+import { FileText, Download, Loader2, FileCheck } from "lucide-react";
 import { toast } from "sonner";
-import { ThemeToggle } from "@/components/theme-toggle";
 
 interface Source { source: string; snippet: string; }
 interface QARow { Question: string; Answer: string; Sources: Source[]; }

@@ -3,12 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Compass, Database, FileText, Search, ArrowRight, Zap, Shield, BarChart3 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LanguageSwitcher } from "@/components/language-switcher";
-import { SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
-import { auth } from "@clerk/nextjs/server";
 import { getTranslations } from "next-intl/server";
 
 export default async function Home() {
-  const { userId } = await auth();
   const t = await getTranslations("Landing");
 
   return (
@@ -31,22 +28,11 @@ export default async function Home() {
             <div className="flex items-center gap-4 border-l border-border pl-4">
               <ThemeToggle />
               <LanguageSwitcher />
-              {userId ? (
-                <>
-                  <Link href="/dashboard">
-                    <Button size="sm" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-6 h-9">
-                      {t("open_workspace")} →
-                    </Button>
-                  </Link>
-                  <UserButton />
-                </>
-              ) : (
-                <SignInButton mode="modal">
-                  <Button variant="ghost" size="sm" className="font-mono text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground rounded-none">
-                    {t("login")}
-                  </Button>
-                </SignInButton>
-              )}
+              <Link href="/dashboard">
+                <Button size="sm" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-6 h-9">
+                  {t("open_workspace")} →
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -69,19 +55,11 @@ export default async function Home() {
         </p>
 
         <div className="mt-12 flex flex-col sm:flex-row gap-4">
-          {userId ? (
-            <Link href="/dashboard">
-              <Button size="lg" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-8 h-12">
-                {t("open_workspace")}
-              </Button>
-            </Link>
-          ) : (
-            <SignUpButton mode="modal">
-              <Button size="lg" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-8 h-12">
-                {t("start_free")}
-              </Button>
-            </SignUpButton>
-          )}
+          <Link href="/dashboard">
+            <Button size="lg" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-8 h-12">
+              {t("open_workspace")}
+            </Button>
+          </Link>
           <Link href="/inspect">
             <Button size="lg" variant="ghost" className="rounded-none font-mono text-xs tracking-widest uppercase px-8 h-12 text-muted-foreground hover:text-foreground">
               {t("inspect_ai")}
@@ -267,19 +245,11 @@ export default async function Home() {
             </h2>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 shrink-0">
-            {userId ? (
-              <Link href="/dashboard">
-                <Button size="lg" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-8 h-12">
-                  {t("open_workspace")}
-                </Button>
-              </Link>
-            ) : (
-              <SignUpButton mode="modal">
-                <Button size="lg" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-8 h-12">
-                  {t("cta_get_started")}
-                </Button>
-              </SignUpButton>
-            )}
+            <Link href="/dashboard">
+              <Button size="lg" className="rounded-none bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-widest uppercase px-8 h-12">
+                {t("open_workspace")}
+              </Button>
+            </Link>
             <Link href="/inspect">
               <Button size="lg" variant="ghost" className="rounded-none font-mono text-xs tracking-widest uppercase px-8 h-12 text-muted-foreground hover:text-foreground">
                 {t("inspect_ai")}

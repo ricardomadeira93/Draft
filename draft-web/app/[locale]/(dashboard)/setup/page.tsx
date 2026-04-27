@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Upload, CheckCircle2, Trash2, FileText, Loader2, FileType2 } from "lucide-react";
-import { useAuth } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
@@ -23,7 +22,6 @@ export default function KnowledgeBase() {
   const [loadingFiles, setLoadingFiles] = useState(true);
   const [deletingFile, setDeletingFile] = useState<string | null>(null);
 
-  const { getToken, orgId } = useAuth();
   const t = useTranslations("Setup");
 
   const [hasTemplate, setHasTemplate] = useState(false);
@@ -31,19 +29,12 @@ export default function KnowledgeBase() {
   const [uploadingTemplate, setUploadingTemplate] = useState(false);
   const [removingTemplate, setRemovingTemplate] = useState(false);
 
-  const fetchFiles = useCallback(async () => {
+  const fetchFiles = async () => {
     try {
-      const token = await getToken();
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
       const [filesRes, templateRes] = await Promise.all([
-        fetch(`${API_URL}/kb/files`, {
-          cache: "no-store",
-          headers: { "Authorization": `Bearer ${token}`, ...(orgId && { "X-Org-Id": orgId }) }
-        }),
-        fetch(`${API_URL}/template`, {
-          cache: "no-store",
-          headers: { "Authorization": `Bearer ${token}`, ...(orgId && { "X-Org-Id": orgId }) }
-        })
+        fetch(`${API_URL}/kb/files`, { cache: "no-store" }),
+        fetch(`${API_URL}/template`, { cache: "no-store" })
       ]);
       const [filesData, templateData] = await Promise.all([filesRes.json(), templateRes.json()]);
       setKbFiles(filesData.files ?? []);
@@ -53,9 +44,36 @@ export default function KnowledgeBase() {
     } finally {
       setLoadingFiles(false);
     }
-  }, [getToken, orgId]);
+  };
 
-  useEffect(() => { fetchFiles(); }, [fetchFiles]);
+  useEffect(() => {
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
+        const [filesRes, templateRes] = await Promise.all([
+          fetch(`${API_URL}/kb/files`, { cache: "no-store" }),
+          fetch(`${API_URL}/template`, { cache: "no-store" })
+        ]);
+        const [filesData, templateData] = await Promise.all([filesRes.json(), templateRes.json()]);
+        if (!cancelled) {
+          setKbFiles(filesData.files ?? []);
+          setHasTemplate(templateData.has_template ?? false);
+        }
+      } catch {
+        // backend may not be running yet
+      } finally {
+        if (!cancelled) {
+          setLoadingFiles(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleUpload = async () => {
     if (!file) return;
@@ -64,15 +82,10 @@ export default function KnowledgeBase() {
     const formData = new FormData();
     formData.append("file", file);
     try {
-      const token = await getToken();
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
       const res = await fetch(`${API_URL}/upload-kb`, { 
         method: "POST", 
         body: formData,
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          ...(orgId && { "X-Org-Id": orgId })
-        }
       });
       const data = await res.json();
       if (res.ok) { setSuccessMsg(data.message); setFile(null); await fetchFiles(); toast.success("Document uploaded"); }
@@ -95,15 +108,10 @@ export default function KnowledgeBase() {
       const formData = new FormData();
       formData.append("file", sampleFile);
       
-      const token = await getToken();
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
       const uploadRes = await fetch(`${API_URL}/upload-kb`, { 
         method: "POST", 
         body: formData,
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          ...(orgId && { "X-Org-Id": orgId })
-        }
       });
       const data = await uploadRes.json();
       if (uploadRes.ok) { setSuccessMsg(data.message); await fetchFiles(); toast.success("Sample document loaded"); }
@@ -118,14 +126,9 @@ export default function KnowledgeBase() {
   const handleDelete = async (filename: string) => {
     setDeletingFile(filename);
     try {
-      const token = await getToken();
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
       const res = await fetch(`${API_URL}/kb/files/${encodeURIComponent(filename)}`, { 
         method: "DELETE",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          ...(orgId && { "X-Org-Id": orgId })
-        }
       });
       if (res.ok) { await fetchFiles(); toast.success("Document removed"); }
       else { const data = await res.json(); toast.error("Delete failed", { description: data.detail ?? "Please try again." }); }
@@ -269,11 +272,9 @@ export default function KnowledgeBase() {
                 onClick={async () => {
                   setRemovingTemplate(true);
                   try {
-                    const token = await getToken();
                     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
                     await fetch(`${API_URL}/template`, {
                       method: "DELETE",
-                      headers: { "Authorization": `Bearer ${token}`, ...(orgId && { "X-Org-Id": orgId }) }
                     });
                     setHasTemplate(false);
                     setTemplateFile(null);
@@ -318,14 +319,12 @@ export default function KnowledgeBase() {
                   if (!templateFile) return;
                   setUploadingTemplate(true);
                   try {
-                    const token = await getToken();
                     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
                     const fd = new FormData();
                     fd.append("file", templateFile);
                     const res = await fetch(`${API_URL}/template`, {
                       method: "POST",
                       body: fd,
-                      headers: { "Authorization": `Bearer ${token}`, ...(orgId && { "X-Org-Id": orgId }) }
                     });
                     if (res.ok) { setHasTemplate(true); setTemplateFile(null); toast.success("Template saved"); }
                     else toast.error("Upload failed", { description: "Please try again." });

@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { FileText, Download, Loader2, FileCheck } from "lucide-react";
-import { useAuth } from "@clerk/nextjs";
 import { toast } from "sonner";
 
 interface Source { source: string; snippet: string; }
@@ -27,18 +26,13 @@ function downloadCSV(rows: QARow[], filename: string) {
   URL.revokeObjectURL(url); document.body.removeChild(a);
 }
 
-async function handleExportDoc(results: QARow[], format: "pdf" | "docx", originalFilename: string, setExporting: (state: boolean) => void, getToken: () => Promise<string | null>, orgId: string | null | undefined) {
+async function handleExportDoc(results: QARow[], format: "pdf" | "docx", originalFilename: string, setExporting: (state: boolean) => void) {
   setExporting(true);
   try {
-    const token = await getToken();
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
     const res = await fetch(`${API_URL}/export`, {
       method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-        ...(orgId && { "X-Org-Id": orgId })
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ results, format })
     });
     if (!res.ok) throw new Error("Failed to export document");
@@ -50,25 +44,20 @@ async function handleExportDoc(results: QARow[], format: "pdf" | "docx", origina
     a.download = `answered_${originalFilename.replace(".csv", "")}.${format}`;
     document.body.appendChild(a); a.click();
     URL.revokeObjectURL(url); document.body.removeChild(a);
-  } catch (e) {
+  } catch {
     toast.error("Export failed", { description: "Could not generate the file. Please try again." });
   } finally {
     setExporting(false);
   }
 }
 
-async function handleShare(results: QARow[], setSharing: (state: boolean) => void, setShared: (state: boolean) => void, getToken: () => Promise<string | null>, orgId: string | null | undefined) {
+async function handleShare(results: QARow[], setSharing: (state: boolean) => void, setShared: (state: boolean) => void) {
   setSharing(true);
   try {
-    const token = await getToken();
     const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
     const res = await fetch(`${API_URL}/share`, {
       method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-        ...(orgId && { "X-Org-Id": orgId })
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ results })
     });
     if (!res.ok) throw new Error("Failed to generate share link");
@@ -79,7 +68,7 @@ async function handleShare(results: QARow[], setSharing: (state: boolean) => voi
     setShared(true);
     toast.success("Link copied to clipboard");
     setTimeout(() => setShared(false), 3000);
-  } catch (e) {
+  } catch {
     toast.error("Share failed", { description: "Could not generate a share link. Please try again." });
   } finally {
     setSharing(false);
@@ -184,23 +173,14 @@ export default function Workspace() {
   const [results, setResults] = useState<QARow[] | null>(null);
   const [editedAnswers, setEditedAnswers] = useState<Record<number, string>>({});
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const { getToken, orgId } = useAuth();
-
   // Merge original results with any user edits
   const mergedResults: QARow[] = (results ?? []).map((row, i) =>
     i in editedAnswers ? { ...row, Answer: editedAnswers[i] } : row
   );
 
-  // Parse row count whenever file changes
-  useEffect(() => {
-    if (!file) { setRowCount(0); return; }
-    countCsvRows(file).then(setRowCount);
-  }, [file]);
-
   // Elapsed timer while loading
   useEffect(() => {
     if (loading) {
-      setElapsed(0);
       timerRef.current = setInterval(() => setElapsed(s => s + 1), 1000);
     } else {
       if (timerRef.current) clearInterval(timerRef.current);
@@ -210,6 +190,7 @@ export default function Workspace() {
 
   const handleProcess = async () => {
     if (!file) return;
+    setElapsed(0);
     setLoading(true);
     setResults(null);
     setEditedAnswers({});
@@ -217,15 +198,10 @@ export default function Workspace() {
     formData.append("file", file);
     formData.append("language", language);
     try {
-      const token = await getToken();
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
       const res = await fetch(`${API_URL}/process-csv`, { 
         method: "POST", 
         body: formData,
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          ...(orgId && { "X-Org-Id": orgId })
-        }
       });
       if (!res.ok) throw new Error("Backend error.");
       const data = await res.json();
@@ -285,7 +261,12 @@ export default function Workspace() {
                 type="file"
                 accept=".csv"
                 className="max-w-xs mx-auto bg-transparent border-0 text-base font-mono text-muted-foreground"
-                onChange={e => { setResults(null); setFile(e.target.files?.[0] || null); }}
+                onChange={async (e) => {
+                  const nextFile = e.target.files?.[0] || null;
+                  setResults(null);
+                  setFile(nextFile);
+                  setRowCount(nextFile ? await countCsvRows(nextFile) : 0);
+                }}
               />
               {rowCount > 0 && (
                 <p className="font-mono text-xs text-primary">
@@ -336,7 +317,7 @@ export default function Workspace() {
                   variant="outline"
                   size="sm"
                   className="font-mono text-xs tracking-widest uppercase rounded-none gap-2 h-8 border-border"
-                  onClick={() => handleShare(mergedResults, setSharing, setShared, getToken, orgId)}
+                  onClick={() => handleShare(mergedResults, setSharing, setShared)}
                   disabled={sharing || shared}
                 >
                   {sharing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
@@ -347,7 +328,7 @@ export default function Workspace() {
                   variant="ghost"
                   size="sm"
                   className="font-mono text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground rounded-none gap-2 hover:bg-transparent"
-                  onClick={() => handleExportDoc(mergedResults, "pdf", file?.name ?? "rfp.csv", setExporting, getToken, orgId)}
+                  onClick={() => handleExportDoc(mergedResults, "pdf", file?.name ?? "rfp.csv", setExporting)}
                   disabled={exporting}
                 >
                   {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
@@ -357,7 +338,7 @@ export default function Workspace() {
                   variant="ghost"
                   size="sm"
                   className="font-mono text-xs tracking-widest uppercase text-muted-foreground hover:text-foreground rounded-none gap-2 hover:bg-transparent"
-                  onClick={() => handleExportDoc(mergedResults, "docx", file?.name ?? "rfp.csv", setExporting, getToken, orgId)}
+                  onClick={() => handleExportDoc(mergedResults, "docx", file?.name ?? "rfp.csv", setExporting)}
                   disabled={exporting}
                 >
                   {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}

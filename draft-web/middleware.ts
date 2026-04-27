@@ -1,27 +1,7 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import createMiddleware from 'next-intl/middleware';
 import { routing } from './routing';
 
-const intlMiddleware = createMiddleware(routing);
-
-const isProtectedRoute = createRouteMatcher([
-  '/:locale/dashboard(.*)',
-  '/:locale/setup(.*)',
-  '/:locale/respond(.*)',
-  '/:locale/inspect(.*)',
-  '/:locale/history(.*)',
-  '/:locale/team(.*)',
-  '/:locale/settings(.*)',
-  '/:locale/knowledge(.*)',
-  '/:locale/workspace(.*)',
-]);
-
-export default clerkMiddleware(async (auth, req) => {
-  if (isProtectedRoute(req)) {
-    await auth.protect();
-  }
-  return intlMiddleware(req);
-});
+export default createMiddleware(routing);
 
 export const config = {
   matcher: [

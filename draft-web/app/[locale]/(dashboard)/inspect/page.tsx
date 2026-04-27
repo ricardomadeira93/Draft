@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Loader2, FileText, ChevronDown, ChevronRight } from "lucide-react";
-import { useAuth } from "@clerk/nextjs";
 import { toast } from "sonner";
 
 interface Source { source: string; snippet: string; }
@@ -46,23 +45,16 @@ export default function EvaluatePage() {
   const [question, setQuestion] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<EvalResult | null>(null);
-  const { getToken, orgId } = useAuth();
-
   const handleEvaluate = async () => {
     const q = question.trim();
     if (!q) return;
     setLoading(true);
     setResult(null);
     try {
-      const token = await getToken();
       const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
       const res = await fetch(`${API_URL}/evaluate`, {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-          ...(orgId && { "X-Org-Id": orgId })
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: q }),
       });
       if (!res.ok) throw new Error("Backend error.");
